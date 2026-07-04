@@ -11,8 +11,8 @@
   設定が空のままだと、確認用のサンプルデータが表示されます。
 ============================================================= -->
 <script>
-  window.SUPABASE_URL = "https://khgxehucpgatvjnxadqo.supabase.co";       // 例: "https://xxxxxxxx.supabase.co"
-  window.SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtoZ3hlaHVjcGdhdHZqbnhhZHFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyMTMyNTcsImV4cCI6MjA5Nzc4OTI1N30.kQg05kemNNBatjckvNmulQH351SK8CtGndkkaBUBsWU";  // 例: "eyJhbGciOi..."
+  window.SUPABASE_URL = "https://khgxehucpgatvjnxadqo.supabase.co";
+  window.SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtoZ3hlaHVjcGdhdHZqbnhhZHFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyMTMyNTcsImV4cCI6MjA5Nzc4OTI1N30.kQg05kemNNBatjckvNmulQH351SK8CtGndkkaBUBsWU";
 </script>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -34,10 +34,10 @@
   --lemon:      #efe9ab;
   --lemon-soft: #f8f4d8;
   --lemon-vivid:#fbf07a;
-  --tod-asa:    #bdf2cf;
-  --tod-hiru:   #fff3a8;
-  --tod-yoru:   #b9d9f2;
-  --tod-shinya: #d9c9f2;
+  --tod-asa:    #76ffa4;
+  --tod-hiru:   #fdff72;
+  --tod-yoru:   #7dc7ff;
+  --tod-shinya: #cdb0fc;
   --select-bg:    rgba(159,213,255,0.20);
   --select-border:rgba(196,230,255,0.65);
   --select-glow:  rgba(159,213,255,0.4);
@@ -551,7 +551,7 @@ h1,h2,h3{ font-family:var(--font-disp-jp); font-weight:700; margin:0; color:var(
         </div>
       </div>
       <div class="hero-copy">
-        <div class="eyebrow"><svg width="12" height="12"><use href="#ico-star"/></svg>星降る止まり木 ── 星と物語がつながる、あなたのためのポータルサイト</div>
+        <div class="eyebrow"><svg width="12" height="12"><use href="#ico-star"/></svg>星降る止まり木 ── 星々と物語がつながるポータルサイト</div>
         <h1 id="heroName">夕星るちあ<span class="en-name" id="heroNameEn">SEKISEI RUCHIA</span></h1>
         <p class="tagline" id="heroTagline">光の欠片を集めながら、いろんな世界へ出会いに行く星旅の配信者。今日もどこかの星座の下で、あなたと物語を紡いでいます。</p>
 
@@ -568,7 +568,7 @@ h1,h2,h3{ font-family:var(--font-disp-jp); font-weight:700; margin:0; color:var(
         <div class="card news-card">
           <svg class="card-corner tl" viewBox="0 0 100 100" style="color:var(--lemon)"><use href="#art-orb"/></svg>
           <div class="eyebrow">NEWS <span class="jp-small">・お知らせ</span></div>
-          <div id="newsList"><div class="loading-note">星々からの便りを読み込み中…</div></div>
+          <div id="newsList"><div class="loading-note">星の欠片を読み込み中…</div></div>
           <a class="view-more" href="#" data-nav="schedule">すべて見る <svg><use href="#ico-arrow"/></svg></a>
         </div>
 
@@ -843,41 +843,6 @@ tickClock(); setInterval(tickClock, 1000*15);
 ========================================================== */
 const hasSupabase = !!(window.SUPABASE_URL && window.SUPABASE_ANON_KEY);
 const sb = hasSupabase ? supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY) : null;
-
-// ---- fallback sample data (shown until Supabase is connected) ----
-const SAMPLE = {
-  profile: {
-    name_jp:'夕星るちあ', name_en:'Sekisei Ruchia',
-    tagline:'光の欠片を集めながら、いろんな世界へ出会いに行く星旅の配信者。',
-    bio:'星々を旅する配信者。光の欠片を集めながら、いろんな世界と出会うのが好きです。あなたと一緒に、特別な物語を作っていきたい。',
-    birthday:'7月3日', height:'158cm', likes:'星・物語・お菓子', dislikes:'怖い話・ホラー',
-    image_url:'', sns_x_url:'#', sns_youtube_url:'#', wishlist_url:'#'
-  },
-  news:[
-    {date:'2025-07-03', tag:'お知らせ', title:'サイトをリニューアルしました！'},
-    {date:'2025-06-30', tag:'配信', title:'今夜21時〜 マーダーミステリー配信！'},
-    {date:'2025-06-28', tag:'記録', title:'シナリオ通過報告を更新しました'},
-  ],
-  schedule:[
-    {date:'2025-07-05', time:'21:00', title:'マーダーミステリー', category:'シナリオ', timeslot:'夜'},
-    {date:'2025-07-08', time:'20:00', title:'クトゥルフ神話TRPG', category:'シナリオ', timeslot:'夜'},
-    {date:'2025-07-12', time:'14:00', title:'新作ゲーム実況', category:'ゲーム', timeslot:'昼'},
-    {date:'2025-07-15', time:'08:00', title:'朝活雑談配信', category:'リアル', timeslot:'朝'},
-    {date:'2025-07-15', time:'21:30', title:'ホラーゲーム配信', category:'ゲーム', timeslot:'夜'},
-    {date:'2025-07-20', time:'23:30', title:'深夜の星巡り雑談', category:'リアル', timeslot:'深夜'},
-    {date:'2025-07-22', time:'20:00', title:'共同ミッション配信', category:'ゲーム', timeslot:'夜'},
-    {date:'2025-06-28', time:'19:00', title:'先月のコラボ配信', category:'リアル', timeslot:'夜'},
-    {date:'2025-06-20', time:'13:00', title:'先月のゲーム実況', category:'ゲーム', timeslot:'昼'},
-  ],
-  scenario:[
-    {date:null, title:'シナリオ名 Y（日程未定・招待予定）', content:'次に挑戦したいシナリオの話が出ています。日程はまだ未定ですが、決まり次第お知らせします。'},
-    {date:'2025-08-02', title:'シナリオ名 X（開催予定）', content:'次回は新しい招待制シナリオへ挑戦予定です。参加条件などは配信内でお知らせします。'},
-    {date:'2025-07-01', title:'シナリオ名 A', content:'今日の探索では新しい星座の欠片を見つけました。次回はさらに深い場所へ向かいます。'},
-    {date:'2025-06-24', title:'シナリオ名 B', content:'仲間と共に古い天球儀の謎を解き明かしました。物語はまだ続きます。'},
-    {date:'2025-06-18', title:'シナリオ名 C', content:'流れ星に願いを託しながら、次の物語の扉を開きました。'},
-    {date:'2025-06-12', title:'シナリオ名 D', content:'静かな夜、星屑の中で新しい仲間と出会いました。'},
-  ]
-};
 
 async function fetchTable(table, opts={}){
   if(!sb) return null;
