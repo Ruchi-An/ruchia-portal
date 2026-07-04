@@ -34,10 +34,9 @@
   --lemon:      #efe9ab;
   --lemon-soft: #f8f4d8;
   --lemon-vivid:#fbf07a;
-  --tod-asa:    #76ffa4;
-  --tod-hiru:   #fdff72;
-  --tod-yoru:   #7dc7ff;
-  --tod-shinya: #cdb0fc;
+  --cat-game:     #c9b8f0;  /* ゲーム：パステル紫 */
+  --cat-scenario: #f2acaa;  /* シナリオ：パステル赤 */
+  --cat-real:     #cdeef0;  /* リアル：白に近い水色 */
   --select-bg:    rgba(159,213,255,0.20);
   --select-border:rgba(196,230,255,0.65);
   --select-glow:  rgba(159,213,255,0.4);
@@ -463,6 +462,25 @@ h1,h2,h3{ font-family:var(--font-disp-jp); font-weight:700; margin:0; color:var(
     <circle cx="16.3" cy="8.3" r="0.6" fill="currentColor"/>
   </symbol>
 
+  <!-- Lucide-style time-of-day icons -->
+  <symbol id="ico-sunrise" viewBox="0 0 24 24">
+    <path d="M12 3v4M4.2 10.2l1.4 1.4M19.8 10.2l-1.4 1.4M2 18h2M20 18h2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M6 18a6 6 0 0112 0" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M8 14l4-4 4 4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M3 21h18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="ico-sun" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="1.5"/>
+    <path d="M12 2.5v2.6M12 18.9v2.6M4.2 4.2l1.9 1.9M17.9 17.9l1.9 1.9M2.5 12h2.6M18.9 12h2.6M4.2 19.8l1.9-1.9M17.9 6.1l1.9-1.9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="ico-moon" viewBox="0 0 24 24">
+    <path d="M20 14.5A8.5 8.5 0 019.5 4a8.5 8.5 0 1010.5 10.5Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+  </symbol>
+  <symbol id="ico-moon-star" viewBox="0 0 24 24">
+    <path d="M17.5 15.5A7.5 7.5 0 019 5a7.5 7.5 0 109.2 9.2Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+    <path d="M19.5 3.5l.6 1.5 1.5.6-1.5.6-.6 1.5-.6-1.5-1.5-.6 1.5-.6z" fill="currentColor"/>
+  </symbol>
+
   <!-- illustrative gear -->
   <symbol id="art-gear" viewBox="0 0 100 100">
     <g fill="none" stroke="currentColor" stroke-width="1.3">
@@ -608,16 +626,16 @@ h1,h2,h3{ font-family:var(--font-disp-jp); font-weight:700; margin:0; color:var(
         <div class="cal-legend">
           <div class="cal-legend-title">種類</div>
           <div class="cal-legend-group">
-            <span class="item"><svg width="12" height="12" style="color:var(--pale-blue)"><use href="#ico-gamepad"/></svg>ゲーム</span>
-            <span class="item"><svg width="12" height="12" style="color:var(--pale-blue)"><use href="#ico-book-open"/></svg>シナリオ</span>
-            <span class="item"><svg width="12" height="12" style="color:var(--pale-blue)"><use href="#ico-bird"/></svg>リアル</span>
+            <span class="item"><svg width="12" height="12" style="color:var(--cat-game)"><use href="#ico-gamepad"/></svg>ゲーム</span>
+            <span class="item"><svg width="12" height="12" style="color:var(--cat-scenario)"><use href="#ico-book-open"/></svg>シナリオ</span>
+            <span class="item"><svg width="12" height="12" style="color:var(--cat-real)"><use href="#ico-bird"/></svg>リアル</span>
           </div>
           <div class="cal-legend-title">時間帯</div>
           <div class="cal-legend-group">
-            <span class="item"><i class="sw" style="background:var(--tod-asa)"></i>朝</span>
-            <span class="item"><i class="sw" style="background:var(--tod-hiru)"></i>昼</span>
-            <span class="item"><i class="sw" style="background:var(--tod-yoru)"></i>夜</span>
-            <span class="item"><i class="sw" style="background:var(--tod-shinya)"></i>深夜</span>
+            <span class="item"><svg width="12" height="12" style="color:var(--pale-blue)"><use href="#ico-sunrise"/></svg>朝</span>
+            <span class="item"><svg width="12" height="12" style="color:var(--pale-blue)"><use href="#ico-sun"/></svg>昼</span>
+            <span class="item"><svg width="12" height="12" style="color:var(--pale-blue)"><use href="#ico-moon"/></svg>夜</span>
+            <span class="item"><svg width="12" height="12" style="color:var(--pale-blue)"><use href="#ico-moon-star"/></svg>深夜</span>
           </div>
         </div>
       </div>
@@ -891,16 +909,16 @@ let currentMonth = new Date();
 let scheduleData = [];
 
 const CATEGORY_ICON = { 'ゲーム':'#ico-gamepad', 'シナリオ':'#ico-book-open', 'リアル':'#ico-bird' };
+const CATEGORY_COLOR = { 'ゲーム':'var(--cat-game)', 'シナリオ':'var(--cat-scenario)', 'リアル':'var(--cat-real)' };
 const TOD_ORDER = ['asa','hiru','yoru','shinya'];
 const TOD_LABEL = { asa:'朝', hiru:'昼', yoru:'夜', shinya:'深夜' };
-const TOD_COLOR = { asa:'var(--tod-asa)', hiru:'var(--tod-hiru)', yoru:'var(--tod-yoru)', shinya:'var(--tod-shinya)' };
+const TOD_ICON = { asa:'#ico-sunrise', hiru:'#ico-sun', yoru:'#ico-moon', shinya:'#ico-moon-star' };
 
 function activeTods(e){
   return TOD_ORDER.filter(k => e['is_'+k]);
 }
-function primaryTodColor(e){
-  const t = activeTods(e)[0];
-  return t ? TOD_COLOR[t] : 'var(--pale-blue)';
+function categoryColor(e){
+  return CATEGORY_COLOR[e.note_type] || 'var(--pale-blue)';
 }
 function fmtDateMDW(iso){
   const d = new Date(iso);
@@ -912,7 +930,7 @@ function fmtDateMDW(iso){
 
 function eventChip(e){
   const icon = CATEGORY_ICON[e.note_type] || '#ico-star';
-  const color = primaryTodColor(e);
+  const color = categoryColor(e);
   const todLabel = activeTods(e).map(t=>TOD_LABEL[t]).join('・');
   return `<svg width="9" height="9" style="color:${color}" title="${e.note_type||''}・${todLabel}：${e.schedule_title||''}"><use href="${icon}"/></svg>`;
 }
@@ -964,11 +982,11 @@ function renderCalendar(){
 
 function eventRowHtml(e, isPast){
   const icon = CATEGORY_ICON[e.note_type] || '#ico-star';
-  const color = primaryTodColor(e);
+  const color = categoryColor(e);
   const showExtra = e.note_type==='ゲーム' || e.note_type==='シナリオ';
 
   const todChips = activeTods(e).map(t=>
-    `<span class="event-tag" style="color:${TOD_COLOR[t]}; border-color:${TOD_COLOR[t]}"><i class="sw" style="background:${TOD_COLOR[t]}"></i> ${TOD_LABEL[t]}</span>`
+    `<span class="event-tag" style="color:var(--pale-blue); border-color:var(--line-strong)"><svg width="10" height="10"><use href="${TOD_ICON[t]}"/></svg> ${TOD_LABEL[t]}</span>`
   ).join('');
 
   const thumb = (showExtra && e.img_thumbnail)
