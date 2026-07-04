@@ -307,6 +307,10 @@ h1,h2,h3{ font-family:var(--font-disp-jp); font-weight:700; margin:0; color:var(
 .event-body{ flex:1; min-width:0; }
 .event-thumb{ width:34px; height:34px; border-radius:8px; overflow:hidden; flex-shrink:0; border:1px solid var(--line-strong); }
 .event-thumb img{ width:100%; height:100%; object-fit:cover; display:block; }
+.image-modal{position:fixed; inset:0; background:rgba(0,0,0,.8); display:none; justify-content:center; align-items:center; z-index:9999; }
+.image-modal.show{ display:flex;}
+.image-modal img{ max-width:90%; max-height:90%; border-radius:12px; box-shadow:0 0 30px rgba(0,0,0,.5); cursor:zoom-out;}
+
 .event-contents{ font-size:.75rem; color:var(--pale-blue); margin-top:5px; line-height:1.7; }
 .event-badge{ display:inline-flex; align-items:center; padding:1px 8px; border-radius:999px; font-size:.62rem; border:1px solid var(--line-strong); color:var(--star-blue); }
 .event-links{ display:flex; align-items:center; gap:10px; margin-top:7px; flex-wrap:wrap; }
@@ -687,6 +691,9 @@ h1,h2,h3{ font-family:var(--font-disp-jp); font-weight:700; margin:0; color:var(
           <div class="empty-note" style="padding:70px 16px; text-align:center;">左の一覧から記録を選ぶと、ここに詳細が表示されます。</div>
         </div>
       </div>
+      <div id="imageModal" class="image-modal" onclick="closeImage()">
+        <img id="modalImage" src="" alt="">
+      </div>      
     </div>
   </section>
 
@@ -1001,13 +1008,20 @@ function eventRowHtml(e, isPast){
   ).join('');
 
   const thumb = (showExtra && e.img_thumbnail)
-    ? `<div class="event-thumb"><img src="${e.img_thumbnail}" alt=""></div>`
+    ? `<div class="event-thumb">
+        <img src="${e.img_thumbnail}" alt="" onclick="openImage('${e.img_thumbnail}')">
+      </div>`
     : `<div class="event-icon" style="border-color:${color}"><svg style="color:${color}"><use href="${icon}"/></svg></div>`;
 
   const contentsHtml = (showExtra && e.contents) ? `<div class="event-contents">${e.contents}</div>` : '';
   const tableTypeHtml = (e.note_type==='シナリオ' && e.table_type) ? `<span class="event-badge">卓：${e.table_type}</span>` : '';
-  const streamIconHtml = (showExtra && e.stream_url)
-    ? `<a class="event-stream-icon" href="${e.stream_url}" target="_blank" rel="noopener" title="${e.stream_type||'配信'}を見る"><svg width="15" height="15"><use href="#ico-yt"/></svg></a>`
+  const canShowStream =
+    e.table_type === "配信卓" &&
+    e.stream_type === "公開" &&
+    e.stream_url;
+
+  const streamIconHtml = canShowStream
+    ? `<a class="event-stream-icon" href="${e.stream_url}" target="_blank" rel="noopener" title="配信を見る"><svg width="15" height="15"><use href="#ico-yt"/></svg></a>`
     : '';
   const endcardHtml = (e.note_type==='シナリオ' && e.img_endcard)
     ? `<div class="event-endcard"><img src="${e.img_endcard}" alt=""><span>ED</span></div>`
@@ -1190,6 +1204,15 @@ window.addEventListener('resize', ()=>{
     goTo('scenario');
   }
 });
+
+function openImage(src){
+  document.getElementById("modalImage").src = src;
+  document.getElementById("imageModal").classList.add("show");
+}
+
+function closeImage(){
+  document.getElementById("imageModal").classList.remove("show");
+}
 
 /* ==========================================================
    INIT
