@@ -1055,9 +1055,9 @@ function renderUpcoming(list){
   const now = new Date(); now.setHours(0,0,0,0);
 
   const upcoming = (list||[]).filter(e=> new Date(e.date) >= now)
-    .sort((a,b)=> new Date(a.date)-new Date(b.date)).slice(0,6);
+    .sort((a,b)=> new Date(a.date)-new Date(b.date));
   const past = (list||[]).filter(e=> new Date(e.date) < now)
-    .sort((a,b)=> new Date(b.date)-new Date(a.date)).slice(0,5);
+    .sort((a,b)=> new Date(b.date)-new Date(a.date));
 
   upEl.innerHTML = upcoming.length
     ? upcoming.map(e=>eventRowHtml(e,false)).join('')
