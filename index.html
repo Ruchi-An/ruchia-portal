@@ -219,17 +219,6 @@ h1,h2,h3{ font-family:var(--font-disp-jp); font-weight:700; margin:0; color:var(
 .hero-copy .en-name{ font-family:var(--font-disp-en); font-size:1rem; letter-spacing:.16em; color:var(--star-blue); margin-top:8px; display:block; }
 .hero-copy .tagline{ margin-top:20px; color:var(--pale-blue); line-height:2; font-size:.95rem; }
 
-.hero-widgets{ display:flex; gap:14px; margin-top:32px; flex-wrap:wrap; }
-.clock-card{
-  display:flex; align-items:center; gap:14px; padding:14px 20px;
-  border-radius:999px; border:1px solid var(--line-soft);
-  background:rgba(255,255,255,.03);
-}
-.clock-card .dot{ width:9px; height:9px; border-radius:50%; background:var(--lemon-vivid); box-shadow:0 0 10px 2px rgba(251,240,122,.6); animation:pulse 2s infinite; }
-@keyframes pulse{ 0%,100%{opacity:1;} 50%{opacity:.3;} }
-.clock-card .time{ font-family:var(--font-disp-en); font-size:1.1rem; letter-spacing:.05em; }
-.clock-card .date{ font-size:.68rem; color:var(--pale-blue); letter-spacing:.05em; }
-
 .news-card{ margin-top:28px; padding:22px 26px; }
 .news-row{ display:flex; align-items:center; gap:14px; padding:11px 0; border-bottom:1px dashed var(--line-soft); font-size:.85rem; }
 .news-row:last-child{ border-bottom:none; }
@@ -314,6 +303,16 @@ h1,h2,h3{ font-family:var(--font-disp-jp); font-weight:700; margin:0; color:var(
 .event-title{ font-size:.9rem; margin-top:2px; }
 .event-tag{ display:inline-flex; align-items:center; gap:3px; padding:1px 8px; border-radius:999px; font-size:.62rem; border:1px solid var(--line-strong); }
 .event-done{ font-size:.62rem; color:var(--pale-blue); border:1px solid var(--line-soft); padding:1px 8px; border-radius:999px; }
+.event-body{ flex:1; min-width:0; }
+.event-thumb{ width:34px; height:34px; border-radius:8px; overflow:hidden; flex-shrink:0; border:1px solid var(--line-strong); }
+.event-thumb img{ width:100%; height:100%; object-fit:cover; display:block; }
+.event-contents{ font-size:.75rem; color:var(--pale-blue); margin-top:5px; line-height:1.7; }
+.event-badge{ display:inline-flex; align-items:center; padding:1px 8px; border-radius:999px; font-size:.62rem; border:1px solid var(--line-strong); color:var(--star-blue); }
+.event-links{ display:flex; align-items:center; gap:10px; margin-top:7px; flex-wrap:wrap; }
+.event-stream{ display:inline-flex; align-items:center; gap:4px; font-size:.68rem; color:var(--lemon-vivid); text-decoration:none; border-bottom:1px dashed var(--lemon-vivid); padding-bottom:1px; }
+.event-endcard{ position:relative; width:44px; height:26px; border-radius:6px; overflow:hidden; border:1px solid var(--line-strong); flex-shrink:0; }
+.event-endcard img{ width:100%; height:100%; object-fit:cover; display:block; }
+.event-endcard span{ position:absolute; bottom:0; right:0; font-size:.5rem; line-height:1.4; background:rgba(0,0,0,.6); color:#fff; padding:0 3px; }
 
 .view-more{ display:inline-flex; align-items:center; gap:6px; font-size:.72rem; letter-spacing:.06em; color:var(--lemon-soft); margin-top:16px; }
 .view-more svg{ width:12px; height:12px; }
@@ -554,16 +553,6 @@ h1,h2,h3{ font-family:var(--font-disp-jp); font-weight:700; margin:0; color:var(
         <div class="eyebrow"><svg width="12" height="12"><use href="#ico-star"/></svg>星降る止まり木 ── 星々と物語がつながるポータルサイト</div>
         <h1 id="heroName">夕星るちあ<span class="en-name" id="heroNameEn">SEKISEI RUCHIA</span></h1>
         <p class="tagline" id="heroTagline">光の欠片を集めながら、いろんな世界へ出会いに行く星旅の配信者。今日もどこかの星座の下で、あなたと物語を紡いでいます。</p>
-
-        <div class="hero-widgets">
-          <div class="clock-card">
-            <span class="dot"></span>
-            <div>
-              <div class="time" id="liveClock">--:--</div>
-              <div class="date" id="liveDate">----/--/--</div>
-            </div>
-          </div>
-        </div>
 
         <div class="card news-card">
           <svg class="card-corner tl" viewBox="0 0 100 100" style="color:var(--lemon)"><use href="#art-orb"/></svg>
@@ -807,17 +796,6 @@ document.querySelectorAll('[data-nav]').forEach(el=>{
 });
 
 /* ==========================================================
-   LIVE CLOCK
-========================================================== */
-function tickClock(){
-  const now = new Date();
-  const pad = n => String(n).padStart(2,'0');
-  document.getElementById('liveClock').textContent = pad(now.getHours())+':'+pad(now.getMinutes());
-  document.getElementById('liveDate').textContent = now.getFullYear()+'/'+pad(now.getMonth()+1)+'/'+pad(now.getDate());
-}
-tickClock(); setInterval(tickClock, 1000*15);
-
-/* ==========================================================
    SUPABASE CLIENT + DATA LOADING
    ----------------------------------------------------------
    想定テーブル構成（Supabase 側で用意してください）:
@@ -832,9 +810,18 @@ tickClock(); setInterval(tickClock, 1000*15);
      date date, tag text, title text, url text
 
    ruchia_schedule
-     date date, time text, title text,
-     category text   -- 'ゲーム' / 'シナリオ' / 'リアル'
-     timeslot text   -- '朝' / '昼' / '夜' / '深夜'
+     date date (yyyy-mm-dd),                 -- 表示は mm/dd(ddd) に変換
+     time text (hh:mm),
+     note_type text        -- 'ゲーム' / 'シナリオ' / 'リアル'
+     is_asa boolean, is_hiru boolean, is_yoru boolean, is_shinya boolean
+                            -- 朝・昼・夜・深夜。複数 true の可能性あり
+     schedule_title text,
+     contents text,         -- ゲーム・シナリオのみ
+     table_type text,       -- シナリオのみ
+     stream_type text,      -- ゲーム・シナリオのみ
+     stream_url text,       -- ゲーム・シナリオのみ
+     img_thumbnail text,    -- ゲーム・シナリオのみ（Storage の画像URL）
+     img_endcard text       -- シナリオのみ（Storage の画像URL）
 
    ruchia_scenario_logs
      date date (nullable), title text, content text
@@ -904,12 +891,30 @@ let currentMonth = new Date();
 let scheduleData = [];
 
 const CATEGORY_ICON = { 'ゲーム':'#ico-gamepad', 'シナリオ':'#ico-book-open', 'リアル':'#ico-bird' };
-const TIMESLOT_COLOR = { '朝':'var(--tod-asa)', '昼':'var(--tod-hiru)', '夜':'var(--tod-yoru)', '深夜':'var(--tod-shinya)' };
+const TOD_ORDER = ['asa','hiru','yoru','shinya'];
+const TOD_LABEL = { asa:'朝', hiru:'昼', yoru:'夜', shinya:'深夜' };
+const TOD_COLOR = { asa:'var(--tod-asa)', hiru:'var(--tod-hiru)', yoru:'var(--tod-yoru)', shinya:'var(--tod-shinya)' };
+
+function activeTods(e){
+  return TOD_ORDER.filter(k => e['is_'+k]);
+}
+function primaryTodColor(e){
+  const t = activeTods(e)[0];
+  return t ? TOD_COLOR[t] : 'var(--pale-blue)';
+}
+function fmtDateMDW(iso){
+  const d = new Date(iso);
+  if(isNaN(d)) return iso;
+  const pad = n => String(n).padStart(2,'0');
+  const dow = ['日','月','火','水','木','金','土'][d.getDay()];
+  return `${pad(d.getMonth()+1)}/${pad(d.getDate())}(${dow})`;
+}
 
 function eventChip(e){
-  const icon = CATEGORY_ICON[e.category] || '#ico-star';
-  const color = TIMESLOT_COLOR[e.timeslot] || 'var(--pale-blue)';
-  return `<svg width="9" height="9" style="color:${color}" title="${e.category||''}・${e.timeslot||''}：${e.title||''}"><use href="${icon}"/></svg>`;
+  const icon = CATEGORY_ICON[e.note_type] || '#ico-star';
+  const color = primaryTodColor(e);
+  const todLabel = activeTods(e).map(t=>TOD_LABEL[t]).join('・');
+  return `<svg width="9" height="9" style="color:${color}" title="${e.note_type||''}・${todLabel}：${e.schedule_title||''}"><use href="${icon}"/></svg>`;
 }
 
 function renderCalendar(){
@@ -958,19 +963,41 @@ function renderCalendar(){
 }
 
 function eventRowHtml(e, isPast){
-  const d = new Date(e.date);
-  const dowJ = ['日','月','火','水','木','金','土'];
-  const icon = CATEGORY_ICON[e.category] || '#ico-star';
-  const color = TIMESLOT_COLOR[e.timeslot] || 'var(--pale-blue)';
+  const icon = CATEGORY_ICON[e.note_type] || '#ico-star';
+  const color = primaryTodColor(e);
+  const showExtra = e.note_type==='ゲーム' || e.note_type==='シナリオ';
+
+  const todChips = activeTods(e).map(t=>
+    `<span class="event-tag" style="color:${TOD_COLOR[t]}; border-color:${TOD_COLOR[t]}"><i class="sw" style="background:${TOD_COLOR[t]}"></i> ${TOD_LABEL[t]}</span>`
+  ).join('');
+
+  const thumb = (showExtra && e.img_thumbnail)
+    ? `<div class="event-thumb"><img src="${e.img_thumbnail}" alt=""></div>`
+    : `<div class="event-icon" style="border-color:${color}"><svg style="color:${color}"><use href="${icon}"/></svg></div>`;
+
+  const contentsHtml = (showExtra && e.contents) ? `<div class="event-contents">${e.contents}</div>` : '';
+  const tableTypeHtml = (e.note_type==='シナリオ' && e.table_type) ? `<span class="event-badge">卓：${e.table_type}</span>` : '';
+  const streamHtml = (showExtra && e.stream_url)
+    ? `<a class="event-stream" href="${e.stream_url}" target="_blank" rel="noopener">${e.stream_type||'配信'}を見る <svg width="10" height="10"><use href="#ico-arrow"/></svg></a>`
+    : '';
+  const endcardHtml = (e.note_type==='シナリオ' && e.img_endcard)
+    ? `<div class="event-endcard"><img src="${e.img_endcard}" alt=""><span>ED</span></div>`
+    : '';
+  const linksHtml = (streamHtml || endcardHtml) ? `<div class="event-links">${streamHtml}${endcardHtml}</div>` : '';
+
   return `<div class="event-row ${isPast?'past':''}">
-    <div class="event-icon" style="border-color:${color}"><svg style="color:${color}"><use href="${icon}"/></svg></div>
-    <div>
+    ${thumb}
+    <div class="event-body">
       <div class="event-meta">
-        ${(d.getMonth()+1)}.${d.getDate()}(${dowJ[d.getDay()]}) ${e.time||''}
-        <span class="event-tag" style="color:${color}; border-color:${color}"><i class="sw" style="background:${color}"></i> ${e.category||''}・${e.timeslot||''}</span>
+        ${fmtDateMDW(e.date)} ${e.time||''}
+        <span class="event-tag" style="color:${color}; border-color:${color}"><i class="sw" style="background:${color}"></i> ${e.note_type||''}</span>
+        ${todChips}
+        ${tableTypeHtml}
         ${isPast ? '<span class="event-done">終了</span>' : ''}
       </div>
-      <div class="event-title">${e.title}</div>
+      <div class="event-title">${e.schedule_title||''}</div>
+      ${contentsHtml}
+      ${linksHtml}
     </div>
   </div>`;
 }
