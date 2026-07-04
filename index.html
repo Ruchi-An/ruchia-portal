@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>夕星るちあのポータルサイト｜星降る止まり木</title>
+
+<!-- ============================================================
+  SUPABASE 接続設定
+  下の2行に、あなたのSupabaseプロジェクトの URL と anon key を入れてください。
+  設定が空のままだと、確認用のサンプルデータが表示されます。
+============================================================= -->
+<script>
+  window.SUPABASE_URL = "https://khgxehucpgatvjnxadqo.supabase.co";       // 例: "https://xxxxxxxx.supabase.co"
+  window.SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtoZ3hlaHVjcGdhdHZqbnhhZHFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyMTMyNTcsImV4cCI6MjA5Nzc4OTI1N30.kQg05kemNNBatjckvNmulQH351SK8CtGndkkaBUBsWU";  // 例: "eyJhbGciOi..."
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Shippori+Mincho:wght@400;500;600;800&family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+/* ==========================================================
+   0. TOKENS
+========================================================== */
+:root{
+  --ink-void:   #070b22;
+  --night-deep: #0d1638;
+  --night-mid:  #16224e;
+  --night-card: #1b2a5c;
+  --star-blue:  #8fb3ee;
+  --pale-blue:  #cfe0fa;
+  --moon-white: #f8fbff;
+  --lemon:      #efe9ab;
+  --lemon-soft: #f8f4d8;
+  --lemon-vivid:#fbf07a;
+  --tod-asa:    #bdf2cf;
+  --tod-hiru:   #fff3a8;
+  --tod-yoru:   #b9d9f2;
+  --tod-shinya: #d9c9f2;
+  --select-bg:    rgba(159,213,255,0.20);
+  --select-border:rgba(196,230,255,0.65);
+  --select-glow:  rgba(159,213,255,0.4);
+  --line-soft:  rgba(207,224,250,0.16);
+  --line-strong:rgba(207,224,250,0.32);
+  --shadow-deep: 0 20px 60px rgba(2,6,23,0.55);
+  --radius-lg: 22px;
+  --radius-md: 14px;
+  --radius-sm: 8px;
+  --font-disp-jp: "Shippori Mincho", serif;
+  --font-disp-en: "Cinzel Decorative", serif;
+  --font-body: "Noto Sans JP", sans-serif;
+}
+
+*{ box-sizing:border-box; }
+html{ scroll-behavior:smooth; }
+body{
+  margin:0;
+  min-height:100vh;
+  background:var(--ink-void);
+  color:var(--moon-white);
+  font-family:var(--font-body);
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+::selection{ background:var(--lemon); color:var(--ink-void); }
+a{ color:inherit; text-decoration:none; }
+button{ font-family:inherit; cursor:pointer; }
+
+/* ==========================================================
+   1. BACKGROUND — night sky / stardust / constellations
+========================================================== */
+.sky{
+  position:fixed; inset:0; z-index:-3;
+  background:
+    radial-gradient(ellipse 90% 60% at 18% 0%, #1c2a63 0%, transparent 55%),
+    radial-gradient(ellipse 70% 50% at 100% 10%, #142253 0%, transparent 60%),
+    radial-gradient(ellipse 120% 80% at 50% 120%, #0a1230 0%, transparent 60%),
+    linear-gradient(180deg, var(--ink-void) 0%, var(--night-deep) 45%, var(--ink-void) 100%);
+}
+.stardust{ position:fixed; inset:0; z-index:-2; pointer-events:none; }
+.stardust span{
+  position:absolute; border-radius:50%;
+  background:var(--moon-white);
+  opacity:.55;
+  animation:twinkle 4.5s ease-in-out infinite;
+}
+@keyframes twinkle{ 0%,100%{opacity:.15; transform:scale(.8);} 50%{opacity:.9; transform:scale(1.15);} }
+
+.constellations{ position:fixed; inset:0; z-index:-1; pointer-events:none; opacity:.5; }
+
+.shooting-star{
+  position:fixed; z-index:-1; top:8%; left:-10%;
+  width:140px; height:2px;
+  background:linear-gradient(90deg, transparent, var(--lemon-soft) 60%, var(--moon-white));
+  border-radius:2px; opacity:0; filter:drop-shadow(0 0 6px var(--lemon-soft));
+  animation:shoot 9s linear infinite;
+}
+.shooting-star::after{
+  content:""; position:absolute; right:-2px; top:-2px;
+  width:6px; height:6px; border-radius:50%; background:var(--moon-white);
+  box-shadow:0 0 10px 3px var(--lemon-soft);
+}
+@keyframes shoot{
+  0%{ opacity:0; transform:translate(0,0) rotate(18deg); }
+  4%{ opacity:1; }
+  22%{ opacity:0; transform:translate(120vw,60vh) rotate(18deg); }
+  100%{ opacity:0; }
+}
+
+/* ==========================================================
+   2. LAYOUT SHELL
+========================================================== */
+.wrap{ max-width:1320px; margin:0 auto; padding:0 28px 100px; }
+
+/* ---- nav ---- */
+.nav{
+  position:sticky; top:0; z-index:50;
+  backdrop-filter:blur(14px);
+  background:linear-gradient(180deg, rgba(7,11,34,.88), rgba(7,11,34,.55));
+  border-bottom:1px solid var(--line-soft);
+}
+.nav-inner{
+  max-width:1320px; margin:0 auto; padding:16px 28px;
+  display:flex; align-items:center; justify-content:space-between; gap:24px;
+}
+.brand{ display:flex; align-items:center; gap:12px; }
+.brand .glyph{ width:34px; height:34px; }
+.brand-text{ display:flex; flex-direction:column; line-height:1.1; }
+.brand-text .jp{ font-family:var(--font-disp-jp); font-weight:800; font-size:1.05rem; letter-spacing:.06em; }
+.brand-text .en{ font-family:var(--font-disp-en); font-size:.6rem; letter-spacing:.18em; color:var(--star-blue); }
+
+.tabs{ display:flex; gap:6px; background:rgba(255,255,255,0.03); border:1px solid var(--line-soft); border-radius:999px; padding:5px; }
+.tab{
+  display:flex; align-items:center; gap:7px;
+  padding:9px 18px; border-radius:999px; border:1px solid transparent; background:transparent;
+  color:var(--pale-blue); font-size:.82rem; letter-spacing:.05em; font-weight:500;
+  transition:all .25s ease;
+}
+.tab svg{ width:15px; height:15px; opacity:.8; }
+.tab.active{ background:linear-gradient(135deg, var(--select-bg), rgba(255,255,255,.04)); color:var(--moon-white); border-color:var(--select-border); box-shadow:0 4px 18px var(--select-glow); backdrop-filter:blur(6px); }
+.tab.active svg{ opacity:1; }
+.tab:not(.active):hover{ color:var(--moon-white); background:rgba(255,255,255,.05); }
+
+@media(max-width:760px){
+  .nav-inner{ flex-direction:column; gap:12px; padding:14px 16px; }
+  .tabs{ width:100%; justify-content:space-between; }
+  .tab span.label-full{ display:none; }
+}
+
+/* ---- generic card ---- */
+.card{
+  position:relative;
+  background:linear-gradient(160deg, rgba(27,42,92,.55), rgba(13,22,56,.65));
+  border:1px solid var(--line-soft);
+  border-radius:var(--radius-lg);
+  box-shadow:var(--shadow-deep);
+  overflow:hidden;
+}
+.card::before{
+  content:""; position:absolute; inset:0; border-radius:inherit; padding:1px;
+  background:linear-gradient(160deg, rgba(239,233,171,.35), transparent 30%, transparent 70%, rgba(143,179,238,.25));
+  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor; mask-composite:exclude;
+  pointer-events:none;
+}
+.card-corner{ position:absolute; width:26px; height:26px; opacity:.55; pointer-events:none; }
+.card-corner.tl{ top:10px; left:10px; }
+.card-corner.tr{ top:10px; right:10px; transform:scaleX(-1); }
+
+.eyebrow{
+  display:flex; align-items:center; gap:10px;
+  font-family:var(--font-disp-en); font-size:.68rem; letter-spacing:.22em; color:var(--star-blue);
+  text-transform:uppercase; margin-bottom:4px;
+}
+.eyebrow .jp-small{ font-family:var(--font-body); color:var(--pale-blue); letter-spacing:.08em; font-size:.72rem; }
+h1,h2,h3{ font-family:var(--font-disp-jp); font-weight:700; margin:0; color:var(--moon-white); }
+
+.section-title{ display:flex; align-items:baseline; gap:12px; margin:64px 0 22px; }
+.section-title h2{ font-size:1.5rem; }
+.section-title .line{ flex:1; height:1px; background:linear-gradient(90deg, var(--line-strong), transparent); }
+
+/* ==========================================================
+   3. PAGES visibility
+========================================================== */
+.page{ display:none; animation:fadeIn .5s ease; }
+.page.active{ display:block; }
+@keyframes fadeIn{ from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);} }
+
+/* ==========================================================
+   4. TOP PAGE
+========================================================== */
+.hero{
+  display:grid; grid-template-columns:0.85fr 1.15fr; gap:40px;
+  padding-top:56px; align-items:center;
+}
+.hero-portrait{
+  position:relative; aspect-ratio:3/4; border-radius:var(--radius-lg);
+  display:flex; align-items:center; justify-content:center;
+  background:radial-gradient(ellipse at 50% 30%, rgba(143,179,238,.14), transparent 65%);
+}
+.magic-ring{ position:absolute; inset:0; margin:auto; width:96%; height:96%; animation:spin 90s linear infinite; opacity:.65; }
+.magic-ring.rev{ animation-direction:reverse; animation-duration:120s; width:76%; height:76%; opacity:.4; }
+@keyframes spin{ from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
+.portrait-frame{
+  position:relative; z-index:2; width:82%; height:82%; border-radius:50%;
+  border:1px solid var(--line-strong);
+  background:linear-gradient(160deg, rgba(27,42,92,.7), rgba(9,14,38,.85));
+  display:flex; align-items:center; justify-content:center; overflow:hidden;
+  box-shadow:0 0 60px rgba(143,179,238,.18), inset 0 0 40px rgba(0,0,0,.4);
+}
+.portrait-frame img{ width:100%; height:100%; object-fit:cover; }
+.portrait-placeholder{ display:flex; flex-direction:column; align-items:center; gap:10px; color:var(--star-blue); text-align:center; padding:20px; }
+.portrait-placeholder svg{ width:56px; height:56px; opacity:.7; }
+.portrait-placeholder p{ font-size:.72rem; letter-spacing:.06em; color:var(--pale-blue); margin:0; line-height:1.6; }
+
+.hero-copy .eyebrow{ margin-bottom:14px; }
+.hero-copy h1{ font-size:3.1rem; line-height:1.15; letter-spacing:.02em; }
+.hero-copy .en-name{ font-family:var(--font-disp-en); font-size:1rem; letter-spacing:.16em; color:var(--star-blue); margin-top:8px; display:block; }
+.hero-copy .tagline{ margin-top:20px; color:var(--pale-blue); line-height:2; font-size:.95rem; }
+
+.hero-widgets{ display:flex; gap:14px; margin-top:32px; flex-wrap:wrap; }
+.clock-card{
+  display:flex; align-items:center; gap:14px; padding:14px 20px;
+  border-radius:999px; border:1px solid var(--line-soft);
+  background:rgba(255,255,255,.03);
+}
+.clock-card .dot{ width:9px; height:9px; border-radius:50%; background:var(--lemon-vivid); box-shadow:0 0 10px 2px rgba(251,240,122,.6); animation:pulse 2s infinite; }
+@keyframes pulse{ 0%,100%{opacity:1;} 50%{opacity:.3;} }
+.clock-card .time{ font-family:var(--font-disp-en); font-size:1.1rem; letter-spacing:.05em; }
+.clock-card .date{ font-size:.68rem; color:var(--pale-blue); letter-spacing:.05em; }
+
+.news-card{ margin-top:28px; padding:22px 26px; }
+.news-row{ display:flex; align-items:center; gap:14px; padding:11px 0; border-bottom:1px dashed var(--line-soft); font-size:.85rem; }
+.news-row:last-child{ border-bottom:none; }
+.news-date{ color:var(--star-blue); font-family:var(--font-disp-en); font-size:.72rem; letter-spacing:.03em; min-width:78px; }
+.news-tag{ font-size:.65rem; letter-spacing:.04em; padding:3px 10px; border-radius:999px; border:1px solid var(--line-strong); color:var(--lemon-vivid); white-space:nowrap; }
+.news-title{ color:var(--moon-white); }
+
+.quick-nav{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:32px; }
+.quick-card{
+  padding:22px 16px; text-align:center; display:flex; flex-direction:column; align-items:center; gap:10px;
+  transition:transform .3s ease, box-shadow .3s ease; cursor:pointer;
+}
+.quick-card:hover{ transform:translateY(-4px); box-shadow:0 24px 50px rgba(2,6,23,.6); }
+.quick-card svg{ width:30px; height:30px; color:var(--lemon-vivid); }
+.quick-card .jp{ font-family:var(--font-disp-jp); font-size:.95rem; }
+.quick-card .en{ font-family:var(--font-disp-en); font-size:.6rem; letter-spacing:.14em; color:var(--star-blue); }
+
+.sns-row{ display:flex; gap:10px; margin-top:28px; align-items:center; }
+.sns-row .label{ font-size:.7rem; letter-spacing:.12em; color:var(--star-blue); font-family:var(--font-disp-en); }
+.sns-btn{ width:36px; height:36px; border-radius:50%; border:1px solid var(--line-strong); display:flex; align-items:center; justify-content:center; }
+.sns-btn svg{ width:16px; height:16px; }
+.sns-btn:hover{ background:rgba(255,255,255,.06); }
+
+.wishlist-btn{
+  display:inline-flex; align-items:center; gap:9px; margin-top:22px;
+  padding:12px 22px; border-radius:999px; border:1px solid var(--line-strong);
+  background:rgba(251,240,122,0.07); color:var(--moon-white); font-size:.82rem; letter-spacing:.03em;
+  transition:all .25s ease;
+}
+.wishlist-btn svg{ color:var(--lemon-vivid); }
+.wishlist-btn:hover{ background:rgba(251,240,122,0.16); border-color:rgba(251,240,122,.5); transform:translateY(-2px); }
+
+@media(max-width:900px){
+  .hero{ grid-template-columns:1fr; }
+  .hero-portrait{ max-width:340px; margin:0 auto; }
+  .quick-nav{ grid-template-columns:1fr 1fr; }
+}
+
+/* ==========================================================
+   5. SCHEDULE PAGE
+========================================================== */
+.grid-2{ display:grid; grid-template-columns:1fr 1fr; gap:26px; align-items:start; }
+@media(max-width:900px){ .grid-2{ grid-template-columns:1fr; } }
+
+.cal-card{ padding:24px 26px 26px; }
+.cal-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; }
+.cal-head .ym{ font-family:var(--font-disp-jp); display:flex; align-items:baseline; gap:8px; }
+.cal-head .ym .y{ font-size:.85rem; color:var(--pale-blue); font-family:var(--font-disp-en); letter-spacing:.05em; }
+.cal-head .ym .m{ font-size:1.6rem; font-weight:800; color:var(--moon-white); }
+.cal-nav{ display:flex; align-items:center; gap:8px; }
+.cal-nav button{ width:30px; height:30px; border-radius:50%; border:1px solid var(--line-soft); background:transparent; color:var(--pale-blue); display:flex; align-items:center; justify-content:center; }
+.cal-nav button:hover{ background:rgba(255,255,255,.06); }
+.cal-nav .today-btn{ width:auto; border-radius:999px; padding:0 14px; font-size:.68rem; letter-spacing:.05em; color:var(--pale-blue); }
+.cal-nav .today-btn:hover{ background:var(--select-bg); border-color:var(--select-border); color:var(--moon-white); }
+.dow.sun{ color:#f0a9c4; }
+.dow.sat{ color:#9fc8f2; }
+.cal-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:6px; text-align:center; }
+.cal-grid .dow{ font-size:.66rem; color:var(--star-blue); letter-spacing:.05em; padding-bottom:6px; }
+.cal-day{
+  position:relative; aspect-ratio:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
+  border-radius:10px; font-size:.76rem; color:var(--pale-blue); border:1px solid transparent; padding-top:2px;
+}
+.cal-day.muted{ opacity:.25; }
+.cal-day.today{ border-color:var(--select-border); background:var(--select-bg); color:var(--moon-white); font-weight:700; box-shadow:0 0 0 1px var(--select-glow) inset; }
+.cal-day .glyphs{ display:flex; gap:2px; align-items:center; justify-content:center; height:10px; line-height:1; }
+.cal-day .glyphs span{ font-size:8px; }
+.cal-day .glyphs .more{ font-size:7px; color:var(--star-blue); }
+.cal-legend{ display:flex; gap:18px; margin-top:16px; flex-wrap:wrap; font-size:.66rem; color:var(--pale-blue); }
+.cal-legend-group{ display:flex; gap:12px; flex-wrap:wrap; }
+.cal-legend span.item{ display:inline-flex; align-items:center; gap:5px; }
+.cal-legend i.sw, .event-tag i.sw{ width:7px; height:7px; border-radius:50%; display:inline-block; }
+.cal-legend .glyph{ font-size:10px; }
+.cal-legend-title{ width:100%; font-size:.62rem; letter-spacing:.1em; color:var(--star-blue); margin-top:4px; }
+
+.upcoming-card{ padding:24px 26px; }
+.event-row{ display:flex; gap:14px; padding:13px 0; border-bottom:1px dashed var(--line-soft); }
+.event-row:last-child{ border-bottom:none; }
+.event-row.past{ opacity:.5; }
+.event-icon{ width:34px; height:34px; border-radius:50%; border:1px solid var(--line-strong); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.event-icon svg{ width:16px; height:16px; color:var(--lemon-vivid); }
+.event-meta{ font-size:.68rem; color:var(--star-blue); letter-spacing:.03em; display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+.event-title{ font-size:.9rem; margin-top:2px; }
+.event-tag{ display:inline-flex; align-items:center; gap:3px; padding:1px 8px; border-radius:999px; font-size:.62rem; border:1px solid var(--line-strong); }
+.event-done{ font-size:.62rem; color:var(--pale-blue); border:1px solid var(--line-soft); padding:1px 8px; border-radius:999px; }
+
+.view-more{ display:inline-flex; align-items:center; gap:6px; font-size:.72rem; letter-spacing:.06em; color:var(--lemon-soft); margin-top:16px; }
+.view-more svg{ width:12px; height:12px; }
+
+/* ==========================================================
+   6. SCENARIO PAGE
+========================================================== */
+.scenario-toolbar{ padding:10px 24px 4px; }
+.scenario-toolbar input{
+  width:100%; padding:11px 16px; border-radius:999px; border:1px solid var(--line-soft);
+  background:rgba(255,255,255,.03); color:var(--moon-white); font-family:inherit; font-size:.85rem; outline:none;
+}
+.scenario-toolbar input:focus{ border-color:var(--select-border); box-shadow:0 0 0 3px var(--select-glow); }
+.scenario-toolbar input::placeholder{ color:var(--pale-blue); opacity:.6; }
+
+.scenario-tabs{ display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap; }
+.s-tab{
+  display:flex; align-items:center; gap:8px; padding:10px 18px; border-radius:999px;
+  border:1px solid var(--line-soft); background:rgba(255,255,255,.02); color:var(--pale-blue);
+  font-family:var(--font-disp-en); font-size:.66rem; letter-spacing:.12em; text-transform:uppercase;
+}
+.s-tab .jp-small{ font-family:var(--font-body); text-transform:none; letter-spacing:.04em; font-size:.78rem; color:inherit; }
+.s-tab.active{ background:linear-gradient(135deg, var(--select-bg), rgba(255,255,255,.04)); border-color:var(--select-border); color:var(--moon-white); box-shadow:0 4px 16px var(--select-glow); }
+.s-tab:hover:not(.active){ background:rgba(255,255,255,.05); }
+
+.scenario-layout{ display:block; }
+.scenario-detail-panel{ display:none; }
+@media(min-width:901px){
+  .scenario-layout{ display:grid; grid-template-columns:0.85fr 1.15fr; gap:26px; align-items:start; }
+  .scenario-detail-panel{ display:flex; position:sticky; top:96px; min-height:420px; }
+  .scenario-detail-panel .book-page{ flex:1; }
+}
+
+.log-row.active{ background:var(--select-bg); }
+
+.log-list-full{ padding:8px 10px 6px; }
+.log-row{
+  display:grid; grid-template-columns:74px 1fr; gap:4px 16px; align-items:baseline;
+  padding:14px 14px; border-radius:10px; cursor:pointer; transition:.2s; border-bottom:1px dashed var(--line-soft);
+}
+.log-row:hover{ background:var(--select-bg); }
+.log-row .lr-date{ font-size:.66rem; color:var(--star-blue); font-family:var(--font-disp-en); }
+.log-row .lr-title{ font-size:.9rem; color:var(--moon-white); }
+.log-row .lr-excerpt{ grid-column:2; font-size:.76rem; color:var(--pale-blue); opacity:.75; margin-top:2px; }
+.lr-tag.future{
+  display:inline-block; font-size:.6rem; letter-spacing:.04em; padding:1px 8px; border-radius:999px;
+  background:rgba(251,240,122,0.16); color:#fff9b0; border:1px solid rgba(251,240,122,0.45); vertical-align:middle;
+}
+.book-page .lr-tag.future{ background:rgba(120,110,20,0.12); color:#7a6f14; border-color:rgba(120,110,20,.35); }
+
+.load-more-wrap{ display:flex; justify-content:center; padding:20px 0 26px; }
+.view-more-btn{
+  padding:10px 26px; border-radius:999px; border:1px solid var(--line-strong); background:transparent;
+  color:var(--pale-blue); font-size:.78rem; letter-spacing:.05em;
+}
+.view-more-btn:hover{ background:var(--select-bg); color:var(--moon-white); border-color:var(--select-border); }
+
+.back-btn{
+  display:inline-flex; align-items:center; gap:8px; padding:9px 20px; border-radius:999px;
+  border:1px solid var(--line-strong); background:transparent; color:var(--pale-blue); font-size:.8rem;
+}
+.back-btn:hover{ background:var(--select-bg); color:var(--moon-white); }
+.detail-nav{ display:flex; justify-content:space-between; margin-top:18px; }
+.detail-nav button{
+  padding:9px 18px; border-radius:999px; border:1px solid var(--line-soft); background:transparent;
+  color:var(--pale-blue); font-size:.78rem; display:inline-flex; align-items:center; gap:6px;
+}
+.detail-nav button:hover:not(:disabled){ background:var(--select-bg); color:var(--moon-white); }
+.detail-nav button:disabled{ opacity:.3; cursor:default; }
+
+.book{ padding:32px; min-height:460px; display:flex; }
+.book-page{
+  flex:1; background:linear-gradient(160deg, #f4f1e6, #ece6d2);
+  color:#2c2a20; border-radius:6px; padding:34px 30px;
+  box-shadow:inset 0 0 40px rgba(0,0,0,.08);
+  display:flex; flex-direction:column; gap:14px; position:relative;
+  font-family:var(--font-disp-jp);
+}
+.book-page .b-date{ font-family:var(--font-disp-en); font-size:.7rem; letter-spacing:.1em; color:#7a7256; }
+.book-page h3{ color:#2c2a20; font-size:1.2rem; }
+.book-page p{ font-size:.88rem; line-height:2; color:#3c392c; font-family:var(--font-body); font-weight:400; white-space:pre-wrap; }
+.book-page::after{ content:""; position:absolute; right:0; top:14px; bottom:14px; width:1px; background:rgba(0,0,0,.08); }
+
+/* ==========================================================
+   7. PROFILE PAGE
+========================================================== */
+.profile-layout{ display:grid; grid-template-columns:0.7fr 1.3fr; gap:30px; }
+@media(max-width:900px){ .profile-layout{ grid-template-columns:1fr; } }
+.profile-portrait{ aspect-ratio:3/4; border-radius:var(--radius-lg); overflow:hidden; position:relative; }
+.profile-info{ padding:30px 32px; }
+.profile-info .en-name{ font-family:var(--font-disp-en); color:var(--star-blue); font-size:.85rem; letter-spacing:.1em; margin-left:10px; }
+.profile-bio{ color:var(--pale-blue); line-height:2; margin-top:16px; font-size:.9rem; }
+.stat-grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px 28px; margin-top:26px; }
+.stat{ display:flex; justify-content:space-between; border-bottom:1px dashed var(--line-soft); padding-bottom:8px; font-size:.85rem; }
+.stat .k{ color:var(--star-blue); display:flex; align-items:center; gap:6px; }
+.stat .k svg{ width:13px; height:13px; }
+.activity-card{ padding:22px 24px; margin-top:22px; }
+.activity-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:14px; }
+.activity-item{ display:flex; flex-direction:column; align-items:center; gap:8px; padding:14px 6px; border-radius:12px; border:1px solid var(--line-soft); }
+.activity-item svg{ width:22px; height:22px; color:var(--lemon-vivid); }
+.activity-item span{ font-size:.72rem; color:var(--pale-blue); }
+
+/* footer */
+.footer{ text-align:center; margin-top:80px; padding-top:26px; border-top:1px solid var(--line-soft); color:var(--star-blue); font-size:.7rem; letter-spacing:.08em; }
+
+.loading-note{ font-size:.72rem; color:var(--star-blue); padding:10px 0; opacity:.75; }
+.empty-note{ font-size:.8rem; color:var(--pale-blue); padding:18px 0; opacity:.7; text-align:center; }
+</style>
+</head>
+<body>
+
+<div class="sky"></div>
+<div class="stardust" id="stardust"></div>
+<svg class="constellations" id="constellations" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice"></svg>
+<div class="shooting-star" style="animation-delay:0s;"></div>
+<div class="shooting-star" style="animation-delay:5s; top:32%;"></div>
+
+<!-- ============ shared SVG symbol defs ============ -->
+<svg width="0" height="0" style="position:absolute">
+<defs>
+  <symbol id="ico-star" viewBox="0 0 24 24"><path d="M12 2 L14 10 L22 12 L14 14 L12 22 L10 14 L2 12 L10 10 Z" fill="currentColor"/></symbol>
+  <symbol id="ico-calendar" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M3 9h18M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.4" fill="none"/></symbol>
+  <symbol id="ico-book" viewBox="0 0 24 24"><path d="M4 4c3 0 6 1 8 3 2-2 5-3 8-3v15c-3 0-6 1-8 3-2-2-5-3-8-3Z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M12 7v15" stroke="currentColor" stroke-width="1.2"/></symbol>
+  <symbol id="ico-compass" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M15 9l-2 5-4 1 2-5Z" fill="currentColor"/></symbol>
+  <symbol id="ico-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="ico-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M6 11a6 6 0 0012 0M12 17v4M9 21h6" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></symbol>
+  <symbol id="ico-x" viewBox="0 0 24 24"><path d="M4 4l16 16M20 4L4 20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+  <symbol id="ico-yt" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="4" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M10 9.5l6 2.5-6 2.5Z" fill="currentColor"/></symbol>
+  <symbol id="ico-gift" viewBox="0 0 24 24"><path d="M12 3c-3-1-5 1-3 3 2-2-1-4-3-3 0 3 3 3 3 3H6a2 2 0 00-2 2v2h16V8a2 2 0 00-2-2h-3s3 0 3-3c-2-1-4 1-3 3" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M4 10v9a2 2 0 002 2h12a2 2 0 002-2v-9M12 10v11" stroke="currentColor" stroke-width="1.2" fill="none"/></symbol>
+  <symbol id="ico-ruler" viewBox="0 0 24 24"><path d="M3 17L17 3l4 4L7 21Z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><path d="M8 8l2 2M11 5l2 2M14 14l2 2" stroke="currentColor" stroke-width="1.1"/></symbol>
+  <symbol id="ico-heart" viewBox="0 0 24 24"><path d="M12 20s-7-4.4-9.3-8.8C1.2 8 3 5 6.3 5 9 5 11 7 12 8.4 13 7 15 5 17.7 5 21 5 22.8 8 21.3 11.2 19 15.6 12 20 12 20Z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></symbol>
+  <symbol id="ico-cross" viewBox="0 0 24 24"><path d="M12 4v6M4 12h6M14 12h6M12 14v6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><circle cx="12" cy="12" r="2" fill="currentColor"/></symbol>
+
+  <!-- Lucide-style category icons -->
+  <symbol id="ico-gamepad" viewBox="0 0 24 24">
+    <path d="M6 11h4M8 9v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+    <circle cx="15" cy="10.5" r="0.9" fill="currentColor"/>
+    <circle cx="17.5" cy="13" r="0.9" fill="currentColor"/>
+    <path d="M8.5 6h7c3 0 5 2.3 5 5.5v2.2c0 2-1.5 3.3-3.2 2.7-.7-.3-1.2-.9-1.7-1.6l-.6-.9a2.6 2.6 0 00-2.2-1.2h-1.6a2.6 2.6 0 00-2.2 1.2l-.6.9c-.5.7-1 1.3-1.7 1.6-1.7.6-3.2-.7-3.2-2.7v-2.2C3.5 8.3 5.5 6 8.5 6z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="ico-book-open" viewBox="0 0 24 24">
+    <path d="M12 6.5c-1.6-1.3-3.7-2-6.3-2A2 2 0 004 6.4v10.3c0 .8.7 1.4 1.5 1.3 2.2-.3 4.7.2 6.5 1.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M12 6.5c1.6-1.3 3.7-2 6.3-2A2 2 0 0120 6.4v10.3c0 .8-.7 1.4-1.5 1.3-2.2-.3-4.7.2-6.5 1.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M12 6.5v13" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="ico-bird" viewBox="0 0 24 24">
+    <path d="M16 7a3 3 0 013 3c0 3-2 4.5-4.5 5.3M16 7a3 3 0 00-3 3c0 .7.1 1.3.3 1.9M16 7c-3 0-6 1.3-8 3.6M8 10.6c-1.5.4-3 .3-4-.3.6 1.8 2 3 3.7 3.4M8 10.6c0 3 1.6 5.6 4 6.9-1 .6-2.3 1-3.5 1M14.5 15.3c-1.6 2-4 3.2-6.6 3.6" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="16.3" cy="8.3" r="0.6" fill="currentColor"/>
+  </symbol>
+
+  <!-- illustrative gear -->
+  <symbol id="art-gear" viewBox="0 0 100 100">
+    <g fill="none" stroke="currentColor" stroke-width="1.3">
+      <circle cx="50" cy="50" r="30"/>
+      <circle cx="50" cy="50" r="12"/>
+      <g id="teeth"></g>
+      <path d="M50 20v10M50 70v10M20 50h10M70 50h10M29 29l7 7M64 64l7 7M29 71l7-7M64 36l7-7" />
+    </g>
+  </symbol>
+
+  <!-- illustrative feather -->
+  <symbol id="art-feather" viewBox="0 0 100 200">
+    <g fill="none" stroke="currentColor" stroke-width="1.2">
+      <path d="M50 5 C20 40 15 110 50 195 C85 110 80 40 50 5 Z"/>
+      <path d="M50 5 L50 195"/>
+      <path d="M50 30 L28 22 M50 50 L20 44 M50 70 L18 66 M50 90 L20 88 M50 110 L24 112 M50 130 L30 136 M50 150 L36 158 M50 170 L42 178"/>
+      <path d="M50 30 L72 22 M50 50 L80 44 M50 70 L82 66 M50 90 L80 88 M50 110 L76 112 M50 130 L70 136 M50 150 L64 158 M50 170 L58 178"/>
+    </g>
+  </symbol>
+
+  <!-- celestial orb -->
+  <symbol id="art-orb" viewBox="0 0 100 100">
+    <defs>
+      <radialGradient id="orbGrad" cx="35%" cy="30%" r="70%">
+        <stop offset="0%" stop-color="#f8fbff" stop-opacity=".9"/>
+        <stop offset="45%" stop-color="#b9d3f5" stop-opacity=".35"/>
+        <stop offset="100%" stop-color="#8fb3ee" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+    <circle cx="50" cy="50" r="34" fill="url(#orbGrad)" stroke="currentColor" stroke-width="0.8"/>
+    <ellipse cx="50" cy="50" rx="44" ry="14" fill="none" stroke="currentColor" stroke-width="0.6" opacity=".5" transform="rotate(-18 50 50)"/>
+  </symbol>
+
+  <!-- magic circle -->
+  <symbol id="art-magic-circle" viewBox="0 0 400 400">
+    <g fill="none" stroke="currentColor" stroke-width="0.8">
+      <circle cx="200" cy="200" r="190"/>
+      <circle cx="200" cy="200" r="170"/>
+      <circle cx="200" cy="200" r="120"/>
+      <polygon points="200,30 337,285 63,285" opacity=".7"/>
+      <polygon points="200,370 63,115 337,115" opacity=".7"/>
+      <g opacity=".8">
+        <circle cx="200" cy="10" r="3" fill="currentColor" stroke="none"/>
+        <circle cx="390" cy="200" r="3" fill="currentColor" stroke="none"/>
+        <circle cx="200" cy="390" r="3" fill="currentColor" stroke="none"/>
+        <circle cx="10" cy="200" r="3" fill="currentColor" stroke="none"/>
+      </g>
+    </g>
+  </symbol>
+</defs>
+</svg>
+
+<!-- ============ NAV ============ -->
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="brand" data-nav="top">
+      <svg class="glyph" viewBox="0 0 100 100" style="color:var(--lemon)"><use href="#art-orb"/></svg>
+      <div class="brand-text">
+        <span class="jp">星降る止まり木</span>
+        <span class="en">SEKISEI RUCHIA PORTAL</span>
+      </div>
+    </div>
+    <div class="tabs" id="tabs">
+      <button class="tab active" data-nav="top"><svg><use href="#ico-star"/></svg><span class="label-full">TOP</span></button>
+      <button class="tab" data-nav="schedule"><svg><use href="#ico-calendar"/></svg><span class="label-full">SCHEDULE</span></button>
+      <button class="tab" data-nav="scenario"><svg><use href="#ico-book"/></svg><span class="label-full">SCENARIO</span></button>
+      <button class="tab" data-nav="profile"><svg><use href="#ico-compass"/></svg><span class="label-full">PROFILE</span></button>
+    </div>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <!-- ============ TOP ============ -->
+  <section class="page active" id="page-top">
+    <div class="hero">
+      <div class="hero-portrait">
+        <svg class="magic-ring" viewBox="0 0 400 400" style="color:var(--star-blue)"><use href="#art-magic-circle"/></svg>
+        <svg class="magic-ring rev" viewBox="0 0 400 400" style="color:var(--lemon-vivid)"><use href="#art-magic-circle"/></svg>
+        <div class="portrait-frame" id="profilePortraitTop">
+          <div class="portrait-placeholder">
+            <svg viewBox="0 0 24 24"><use href="#ico-star"/></svg>
+            <p>プロフィール画像は<br>Supabase Storage の<br>image_url から表示されます</p>
+          </div>
+        </div>
+      </div>
+      <div class="hero-copy">
+        <div class="eyebrow"><svg width="12" height="12"><use href="#ico-star"/></svg>星降る止まり木 ── 星と物語がつながる、あなたのためのポータルサイト</div>
+        <h1 id="heroName">夕星るちあ<span class="en-name" id="heroNameEn">SEKISEI RUCHIA</span></h1>
+        <p class="tagline" id="heroTagline">光の欠片を集めながら、いろんな世界へ出会いに行く星旅の配信者。今日もどこかの星座の下で、あなたと物語を紡いでいます。</p>
+
+        <div class="hero-widgets">
+          <div class="clock-card">
+            <span class="dot"></span>
+            <div>
+              <div class="time" id="liveClock">--:--</div>
+              <div class="date" id="liveDate">----/--/--</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card news-card">
+          <svg class="card-corner tl" viewBox="0 0 100 100" style="color:var(--lemon)"><use href="#art-orb"/></svg>
+          <div class="eyebrow">NEWS <span class="jp-small">・お知らせ</span></div>
+          <div id="newsList"><div class="loading-note">星々からの便りを読み込み中…</div></div>
+          <a class="view-more" href="#" data-nav="schedule">すべて見る <svg><use href="#ico-arrow"/></svg></a>
+        </div>
+
+        <div class="quick-nav">
+          <div class="card quick-card" data-nav="schedule">
+            <svg><use href="#ico-calendar"/></svg>
+            <span class="jp">SCHEDULE</span><span class="en">スケジュール</span>
+          </div>
+          <div class="card quick-card" data-nav="scenario">
+            <svg><use href="#ico-book"/></svg>
+            <span class="jp">SCENARIO</span><span class="en">シナリオ通過報告</span>
+          </div>
+          <div class="card quick-card" data-nav="profile">
+            <svg><use href="#ico-compass"/></svg>
+            <span class="jp">PROFILE</span><span class="en">プロフィール</span>
+          </div>
+        </div>
+
+        <div class="sns-row">
+          <span class="label">SNS</span>
+          <a class="sns-btn" id="snsXTop" target="_blank" rel="noopener"><svg><use href="#ico-x"/></svg></a>
+          <a class="sns-btn" id="snsYtTop" target="_blank" rel="noopener"><svg><use href="#ico-yt"/></svg></a>
+        </div>
+
+        <a class="wishlist-btn" id="wishlistLink" target="_blank" rel="noopener">
+          <svg width="15" height="15"><use href="#ico-gift"/></svg>
+          欲しいものリストを見る
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SCHEDULE ============ -->
+  <section class="page" id="page-schedule">
+    <div class="section-title"><h2>SCHEDULE <span class="jp-small" style="color:var(--pale-blue); font-size:.85rem; font-family:var(--font-body); margin-left:8px;">スケジュール</span></h2><div class="line"></div></div>
+    <div class="grid-2">
+      <div class="card cal-card">
+        <svg class="card-corner tl" viewBox="0 0 100 100" style="color:var(--star-blue)"><use href="#art-orb"/></svg>
+        <div class="cal-head">
+          <div class="ym"><span class="y" id="calY">----</span><span class="m" id="calM">--月</span></div>
+          <div class="cal-nav">
+            <button class="today-btn" id="calToday">今月</button>
+            <button id="calPrev"><svg width="14" height="14" style="transform:rotate(180deg)"><use href="#ico-arrow"/></svg></button>
+            <button id="calNext"><svg width="14" height="14"><use href="#ico-arrow"/></svg></button>
+          </div>
+        </div>
+        <div class="cal-grid" id="calGrid"></div>
+        <div class="cal-legend">
+          <div class="cal-legend-title">種類</div>
+          <div class="cal-legend-group">
+            <span class="item"><svg width="12" height="12" style="color:var(--pale-blue)"><use href="#ico-gamepad"/></svg>ゲーム</span>
+            <span class="item"><svg width="12" height="12" style="color:var(--pale-blue)"><use href="#ico-book-open"/></svg>シナリオ</span>
+            <span class="item"><svg width="12" height="12" style="color:var(--pale-blue)"><use href="#ico-bird"/></svg>リアル</span>
+          </div>
+          <div class="cal-legend-title">時間帯</div>
+          <div class="cal-legend-group">
+            <span class="item"><i class="sw" style="background:var(--tod-asa)"></i>朝</span>
+            <span class="item"><i class="sw" style="background:var(--tod-hiru)"></i>昼</span>
+            <span class="item"><i class="sw" style="background:var(--tod-yoru)"></i>夜</span>
+            <span class="item"><i class="sw" style="background:var(--tod-shinya)"></i>深夜</span>
+          </div>
+        </div>
+      </div>
+      <div class="card upcoming-card">
+        <svg class="card-corner tr" viewBox="0 0 100 100" style="color:var(--lemon-vivid)"><use href="#art-orb"/></svg>
+        <div class="eyebrow">UPCOMING <span class="jp-small">・これからの予定</span></div>
+        <div id="upcomingList"><div class="loading-note">今後の予定を読み込み中…</div></div>
+        <div class="eyebrow" style="margin-top:26px;">PAST <span class="jp-small">・過去の予定</span></div>
+        <div id="pastList"><div class="loading-note">過去の予定を読み込み中…</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SCENARIO (list) ============ -->
+  <section class="page" id="page-scenario">
+    <div class="section-title"><h2>SCENARIO <span class="jp-small" style="color:var(--pale-blue); font-size:.85rem; font-family:var(--font-body); margin-left:8px;">シナリオ通過報告</span></h2><div class="line"></div></div>
+
+    <div class="scenario-tabs">
+      <button class="s-tab active" data-tab="log"><svg width="13" height="13"><use href="#ico-book-open"/></svg>STORY LOG<span class="jp-small">・記録一覧</span></button>
+      <button class="s-tab" data-tab="plan"><svg width="13" height="13"><use href="#ico-star"/></svg>PLAN NOTE<span class="jp-small">・予定メモ</span></button>
+    </div>
+
+    <div class="scenario-layout">
+      <div class="card scenario-list-card">
+        <svg class="card-corner tl" viewBox="0 0 100 100" style="color:var(--star-blue)"><use href="#art-orb"/></svg>
+        <div class="scenario-toolbar">
+          <input type="text" id="scenarioSearch" placeholder="タイトルで検索…">
+        </div>
+        <div class="log-list-full" id="logList"><div class="loading-note">記録を読み込み中…</div></div>
+        <div id="loadMoreWrap" class="load-more-wrap" style="display:none;">
+          <button id="loadMoreBtn" class="view-more-btn">もっと見る</button>
+        </div>
+      </div>
+
+      <div class="card book scenario-detail-panel" id="scenarioDetailPanel">
+        <svg class="card-corner tr" viewBox="0 0 100 100" style="color:var(--lemon-vivid)"><use href="#art-orb"/></svg>
+        <div class="book-page" id="bookPagePanel">
+          <div class="empty-note" style="padding:70px 16px; text-align:center;">左の一覧から記録を選ぶと、ここに詳細が表示されます。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SCENARIO (detail — narrow screens only) ============ -->
+  <section class="page" id="page-scenario-detail">
+    <button class="back-btn" id="backToList"><svg width="13" height="13" style="transform:rotate(180deg)"><use href="#ico-arrow"/></svg> 一覧に戻る</button>
+    <div class="card book" style="margin-top:18px;">
+      <svg class="card-corner tr" viewBox="0 0 100 100" style="color:var(--lemon-vivid)"><use href="#art-orb"/></svg>
+      <div class="book-page" id="bookPage">
+        <span class="b-date">----.--.--</span>
+        <h3>読み込み中…</h3>
+        <p></p>
+      </div>
+    </div>
+    <div class="detail-nav">
+      <button id="prevLog"><svg width="12" height="12" style="transform:rotate(180deg)"><use href="#ico-arrow"/></svg> 前の記録</button>
+      <button id="nextLog">次の記録 <svg width="12" height="12"><use href="#ico-arrow"/></svg></button>
+    </div>
+  </section>
+
+  <!-- ============ PROFILE ============ -->
+  <section class="page" id="page-profile">
+    <div class="section-title"><h2>PROFILE <span class="jp-small" style="color:var(--pale-blue); font-size:.85rem; font-family:var(--font-body); margin-left:8px;">プロフィール</span></h2><div class="line"></div></div>
+    <div class="profile-layout">
+      <div class="card profile-portrait" id="profilePortraitMain">
+        <div class="portrait-placeholder" style="height:100%; justify-content:center;">
+          <svg viewBox="0 0 24 24"><use href="#ico-star"/></svg>
+          <p>image_url 未設定</p>
+        </div>
+      </div>
+      <div>
+        <div class="card profile-info">
+          <svg class="card-corner tl" viewBox="0 0 100 100" style="color:var(--lemon)"><use href="#art-orb"/></svg>
+          <h2 id="profName">夕星るちあ<span class="en-name" id="profNameEn">Sekisei Ruchia</span></h2>
+          <p class="profile-bio" id="profBio">星々を旅する配信者。光の欠片を集めながら、いろんな世界と出会うのが好きです。あなたと一緒に、特別な物語を作っていきたい。</p>
+          <div class="stat-grid">
+            <div class="stat"><span class="k"><svg><use href="#ico-gift"/></svg>誕生日</span><span id="statBirthday">-</span></div>
+            <div class="stat"><span class="k"><svg><use href="#ico-ruler"/></svg>身長</span><span id="statHeight">-</span></div>
+            <div class="stat"><span class="k"><svg><use href="#ico-heart"/></svg>好きなもの</span><span id="statLikes">-</span></div>
+            <div class="stat"><span class="k"><svg><use href="#ico-cross"/></svg>苦手なもの</span><span id="statDislikes">-</span></div>
+          </div>
+        </div>
+        <div class="card activity-card">
+          <div class="eyebrow">ACTIVITY <span class="jp-small">・活動内容</span></div>
+          <div class="activity-grid">
+            <div class="activity-item"><svg><use href="#ico-mic"/></svg><span>配信</span></div>
+            <div class="activity-item"><svg><use href="#ico-book"/></svg><span>シナリオ通過報告</span></div>
+            <div class="activity-item"><svg><use href="#ico-calendar"/></svg><span>スケジュール</span></div>
+          </div>
+          <div class="sns-row" style="margin-top:20px;">
+            <span class="label">SNS</span>
+            <a class="sns-btn" id="snsXProfile" target="_blank" rel="noopener"><svg><use href="#ico-x"/></svg></a>
+            <a class="sns-btn" id="snsYtProfile" target="_blank" rel="noopener"><svg><use href="#ico-yt"/></svg></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="footer">© 星降る止まり木 — SEKISEI RUCHIA Portal, powered by Supabase</div>
+</div>
+
+<script>
+/* ==========================================================
+   BACKGROUND DECOR — stardust + constellation lines
+========================================================== */
+(function decorateSky(){
+  const dust = document.getElementById('stardust');
+  const n = window.innerWidth < 700 ? 60 : 120;
+  for(let i=0;i<n;i++){
+    const s = document.createElement('span');
+    const size = Math.random()*2 + 0.6;
+    s.style.width = s.style.height = size+'px';
+    s.style.left = Math.random()*100+'%';
+    s.style.top = Math.random()*100+'%';
+    s.style.animationDelay = (Math.random()*4)+'s';
+    s.style.animationDuration = (3+Math.random()*4)+'s';
+    dust.appendChild(s);
+  }
+
+  // simple constellation clusters
+  const svg = document.getElementById('constellations');
+  const clusters = 5;
+  for(let c=0;c<clusters;c++){
+    const cx = Math.random()*1500+50, cy = Math.random()*850+50;
+    const pts = [];
+    const count = 4 + Math.floor(Math.random()*3);
+    for(let i=0;i<count;i++){
+      pts.push([cx + (Math.random()-0.5)*220, cy + (Math.random()-0.5)*180]);
+    }
+    let path = '';
+    pts.forEach((p,i)=>{ path += (i===0?'M':'L') + p[0]+','+p[1]+' '; });
+    const line = document.createElementNS('http://www.w3.org/2000/svg','path');
+    line.setAttribute('d', path);
+    line.setAttribute('stroke', '#8fb3ee');
+    line.setAttribute('stroke-width', '0.6');
+    line.setAttribute('fill', 'none');
+    svg.appendChild(line);
+    pts.forEach(p=>{
+      const dot = document.createElementNS('http://www.w3.org/2000/svg','circle');
+      dot.setAttribute('cx', p[0]); dot.setAttribute('cy', p[1]); dot.setAttribute('r', 1.6);
+      dot.setAttribute('fill', '#f8fbff');
+      svg.appendChild(dot);
+    });
+  }
+})();
+
+/* illustrative gear teeth generator */
+document.querySelectorAll('#teeth').forEach(()=>{});
+(function buildGearTeeth(){
+  const teethGroup = document.querySelector('#art-gear #teeth');
+  if(!teethGroup) return;
+  const cx=50, cy=50, rIn=30, rOut=38;
+  for(let i=0;i<12;i++){
+    const a = (i/12)*Math.PI*2;
+    const x1 = cx+Math.cos(a)*rIn, y1 = cy+Math.sin(a)*rIn;
+    const x2 = cx+Math.cos(a)*rOut, y2 = cy+Math.sin(a)*rOut;
+    const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+    line.setAttribute('x1',x1); line.setAttribute('y1',y1);
+    line.setAttribute('x2',x2); line.setAttribute('y2',y2);
+    teethGroup.appendChild(line);
+  }
+})();
+
+/* ==========================================================
+   NAVIGATION
+========================================================== */
+function goTo(pageId){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+pageId).classList.add('active');
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active', t.dataset.nav===pageId));
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+document.querySelectorAll('[data-nav]').forEach(el=>{
+  el.addEventListener('click', (e)=>{ e.preventDefault(); goTo(el.dataset.nav); });
+});
+
+/* ==========================================================
+   LIVE CLOCK
+========================================================== */
+function tickClock(){
+  const now = new Date();
+  const pad = n => String(n).padStart(2,'0');
+  document.getElementById('liveClock').textContent = pad(now.getHours())+':'+pad(now.getMinutes());
+  document.getElementById('liveDate').textContent = now.getFullYear()+'/'+pad(now.getMonth()+1)+'/'+pad(now.getDate());
+}
+tickClock(); setInterval(tickClock, 1000*15);
+
+/* ==========================================================
+   SUPABASE CLIENT + DATA LOADING
+   ----------------------------------------------------------
+   想定テーブル構成（Supabase 側で用意してください）:
+
+   ruchia_profile (1行のみ)
+     name_jp text, name_en text, tagline text, bio text,
+     birthday text, height text, likes text, dislikes text,
+     image_url text, sns_x_url text, sns_youtube_url text,
+     wishlist_url text
+
+   ruchia_news
+     date date, tag text, title text, url text
+
+   ruchia_schedule
+     date date, time text, title text,
+     category text   -- 'ゲーム' / 'シナリオ' / 'リアル'
+     timeslot text   -- '朝' / '昼' / '夜' / '深夜'
+
+   ruchia_scenario_logs
+     date date (nullable), title text, content text
+     -- date が過去 → STORY LOG（記録一覧）タブに表示
+     -- date が未来、または date が null（日程未定） → PLAN NOTE（予定メモ）タブに表示
+========================================================== */
+const hasSupabase = !!(window.SUPABASE_URL && window.SUPABASE_ANON_KEY);
+const sb = hasSupabase ? supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY) : null;
+
+// ---- fallback sample data (shown until Supabase is connected) ----
+const SAMPLE = {
+  profile: {
+    name_jp:'夕星るちあ', name_en:'Sekisei Ruchia',
+    tagline:'光の欠片を集めながら、いろんな世界へ出会いに行く星旅の配信者。',
+    bio:'星々を旅する配信者。光の欠片を集めながら、いろんな世界と出会うのが好きです。あなたと一緒に、特別な物語を作っていきたい。',
+    birthday:'7月3日', height:'158cm', likes:'星・物語・お菓子', dislikes:'怖い話・ホラー',
+    image_url:'', sns_x_url:'#', sns_youtube_url:'#', wishlist_url:'#'
+  },
+  news:[
+    {date:'2025-07-03', tag:'お知らせ', title:'サイトをリニューアルしました！'},
+    {date:'2025-06-30', tag:'配信', title:'今夜21時〜 マーダーミステリー配信！'},
+    {date:'2025-06-28', tag:'記録', title:'シナリオ通過報告を更新しました'},
+  ],
+  schedule:[
+    {date:'2025-07-05', time:'21:00', title:'マーダーミステリー', category:'シナリオ', timeslot:'夜'},
+    {date:'2025-07-08', time:'20:00', title:'クトゥルフ神話TRPG', category:'シナリオ', timeslot:'夜'},
+    {date:'2025-07-12', time:'14:00', title:'新作ゲーム実況', category:'ゲーム', timeslot:'昼'},
+    {date:'2025-07-15', time:'08:00', title:'朝活雑談配信', category:'リアル', timeslot:'朝'},
+    {date:'2025-07-15', time:'21:30', title:'ホラーゲーム配信', category:'ゲーム', timeslot:'夜'},
+    {date:'2025-07-20', time:'23:30', title:'深夜の星巡り雑談', category:'リアル', timeslot:'深夜'},
+    {date:'2025-07-22', time:'20:00', title:'共同ミッション配信', category:'ゲーム', timeslot:'夜'},
+    {date:'2025-06-28', time:'19:00', title:'先月のコラボ配信', category:'リアル', timeslot:'夜'},
+    {date:'2025-06-20', time:'13:00', title:'先月のゲーム実況', category:'ゲーム', timeslot:'昼'},
+  ],
+  scenario:[
+    {date:null, title:'シナリオ名 Y（日程未定・招待予定）', content:'次に挑戦したいシナリオの話が出ています。日程はまだ未定ですが、決まり次第お知らせします。'},
+    {date:'2025-08-02', title:'シナリオ名 X（開催予定）', content:'次回は新しい招待制シナリオへ挑戦予定です。参加条件などは配信内でお知らせします。'},
+    {date:'2025-07-01', title:'シナリオ名 A', content:'今日の探索では新しい星座の欠片を見つけました。次回はさらに深い場所へ向かいます。'},
+    {date:'2025-06-24', title:'シナリオ名 B', content:'仲間と共に古い天球儀の謎を解き明かしました。物語はまだ続きます。'},
+    {date:'2025-06-18', title:'シナリオ名 C', content:'流れ星に願いを託しながら、次の物語の扉を開きました。'},
+    {date:'2025-06-12', title:'シナリオ名 D', content:'静かな夜、星屑の中で新しい仲間と出会いました。'},
+  ]
+};
+
+async function fetchTable(table, opts={}){
+  if(!sb) return null;
+  try{
+    let q = sb.from(table).select('*');
+    if(opts.order) q = q.order(opts.order.col, {ascending: opts.order.asc});
+    if(opts.limit) q = q.limit(opts.limit);
+    const {data, error} = await q;
+    if(error) throw error;
+    return data;
+  }catch(e){
+    console.warn('Supabase fetch failed for', table, e);
+    return null;
+  }
+}
+
+function fmtDate(iso){
+  const d = new Date(iso);
+  if(isNaN(d)) return iso;
+  return (d.getMonth()+1)+'/'+d.getDate();
+}
+
+/* ---------- render: profile ---------- */
+function renderProfile(p){
+  document.getElementById('heroName').childNodes[0].textContent = p.name_jp+' ';
+  document.getElementById('heroNameEn').textContent = (p.name_en||'').toUpperCase();
+  document.getElementById('heroTagline').textContent = p.tagline || p.bio || '';
+  document.getElementById('profName').childNodes[0].textContent = p.name_jp+' ';
+  document.getElementById('profNameEn').textContent = p.name_en || '';
+  document.getElementById('profBio').textContent = p.bio || '';
+  document.getElementById('statBirthday').textContent = p.birthday || '-';
+  document.getElementById('statHeight').textContent = p.height || '-';
+  document.getElementById('statLikes').textContent = p.likes || '-';
+  document.getElementById('statDislikes').textContent = p.dislikes || '-';
+
+  if(p.image_url){
+    document.getElementById('profilePortraitTop').innerHTML = `<img src="${p.image_url}" alt="${p.name_jp}">`;
+    document.getElementById('profilePortraitMain').innerHTML = `<img src="${p.image_url}" alt="${p.name_jp}" style="width:100%;height:100%;object-fit:cover;">`;
+  }
+  ['snsXTop','snsXProfile'].forEach(id=>document.getElementById(id).href = p.sns_x_url || '#');
+  ['snsYtTop','snsYtProfile'].forEach(id=>document.getElementById(id).href = p.sns_youtube_url || '#');
+  document.getElementById('wishlistLink').href = p.wishlist_url || '#';
+}
+
+/* ---------- render: news ---------- */
+function renderNews(list){
+  const el = document.getElementById('newsList');
+  if(!list || list.length===0){ el.innerHTML = '<div class="empty-note">まだお知らせはありません。</div>'; return; }
+  el.innerHTML = list.slice(0,5).map(n=>`
+    <div class="news-row">
+      <span class="news-date">${fmtDate(n.date)}</span>
+      <span class="news-tag">${n.tag||''}</span>
+      <span class="news-title">${n.title}</span>
+    </div>`).join('');
+}
+
+/* ---------- render: schedule (calendar + upcoming/past) ---------- */
+let currentMonth = new Date();
+let scheduleData = [];
+
+const CATEGORY_ICON = { 'ゲーム':'#ico-gamepad', 'シナリオ':'#ico-book-open', 'リアル':'#ico-bird' };
+const TIMESLOT_COLOR = { '朝':'var(--tod-asa)', '昼':'var(--tod-hiru)', '夜':'var(--tod-yoru)', '深夜':'var(--tod-shinya)' };
+
+function eventChip(e){
+  const icon = CATEGORY_ICON[e.category] || '#ico-star';
+  const color = TIMESLOT_COLOR[e.timeslot] || 'var(--pale-blue)';
+  return `<svg width="9" height="9" style="color:${color}" title="${e.category||''}・${e.timeslot||''}：${e.title||''}"><use href="${icon}"/></svg>`;
+}
+
+function renderCalendar(){
+  const y = currentMonth.getFullYear(), m = currentMonth.getMonth();
+  document.getElementById('calY').textContent = `${y}`;
+  document.getElementById('calM').textContent = `${m+1}月`;
+  const grid = document.getElementById('calGrid');
+  const dows = ['日','月','火','水','木','金','土'];
+  let html = dows.map((d,i)=>`<div class="dow ${i===0?'sun':i===6?'sat':''}">${d}</div>`).join('');
+
+  const firstDay = new Date(y,m,1).getDay();
+  const daysInMonth = new Date(y,m+1,0).getDate();
+  const prevDays = new Date(y,m,0).getDate();
+
+  const eventsByDay = {};
+  scheduleData.forEach(e=>{
+    const d = new Date(e.date);
+    if(d.getFullYear()===y && d.getMonth()===m){
+      const day = d.getDate();
+      (eventsByDay[day] = eventsByDay[day] || []).push(e);
+    }
+  });
+
+  const today = new Date();
+  const isCurMonth = today.getFullYear()===y && today.getMonth()===m;
+
+  for(let i=0;i<firstDay;i++){
+    html += `<div class="cal-day muted">${prevDays-firstDay+i+1}</div>`;
+  }
+  for(let d=1; d<=daysInMonth; d++){
+    const isToday = isCurMonth && today.getDate()===d;
+    const dayEvents = eventsByDay[d] || [];
+    let glyphsHtml = '';
+    if(dayEvents.length){
+      const shown = dayEvents.slice(0,3).map(eventChip).join('');
+      const extra = dayEvents.length>3 ? `<span class="more">+${dayEvents.length-3}</span>` : '';
+      glyphsHtml = `<div class="glyphs">${shown}${extra}</div>`;
+    } else {
+      glyphsHtml = `<div class="glyphs"></div>`;
+    }
+    html += `<div class="cal-day ${isToday?'today':''}">${d}${glyphsHtml}</div>`;
+  }
+  const remainder = (7 - ((firstDay+daysInMonth) % 7)) % 7;
+  for(let i=1;i<=remainder;i++){ html += `<div class="cal-day muted">${i}</div>`; }
+  grid.innerHTML = html;
+}
+
+function eventRowHtml(e, isPast){
+  const d = new Date(e.date);
+  const dowJ = ['日','月','火','水','木','金','土'];
+  const icon = CATEGORY_ICON[e.category] || '#ico-star';
+  const color = TIMESLOT_COLOR[e.timeslot] || 'var(--pale-blue)';
+  return `<div class="event-row ${isPast?'past':''}">
+    <div class="event-icon" style="border-color:${color}"><svg style="color:${color}"><use href="${icon}"/></svg></div>
+    <div>
+      <div class="event-meta">
+        ${(d.getMonth()+1)}.${d.getDate()}(${dowJ[d.getDay()]}) ${e.time||''}
+        <span class="event-tag" style="color:${color}; border-color:${color}"><i class="sw" style="background:${color}"></i> ${e.category||''}・${e.timeslot||''}</span>
+        ${isPast ? '<span class="event-done">終了</span>' : ''}
+      </div>
+      <div class="event-title">${e.title}</div>
+    </div>
+  </div>`;
+}
+
+function renderUpcoming(list){
+  const upEl = document.getElementById('upcomingList');
+  const pastEl = document.getElementById('pastList');
+  const now = new Date(); now.setHours(0,0,0,0);
+
+  const upcoming = (list||[]).filter(e=> new Date(e.date) >= now)
+    .sort((a,b)=> new Date(a.date)-new Date(b.date)).slice(0,6);
+  const past = (list||[]).filter(e=> new Date(e.date) < now)
+    .sort((a,b)=> new Date(b.date)-new Date(a.date)).slice(0,5);
+
+  upEl.innerHTML = upcoming.length
+    ? upcoming.map(e=>eventRowHtml(e,false)).join('')
+    : '<div class="empty-note">今後の予定はまだ登録されていません。</div>';
+
+  pastEl.innerHTML = past.length
+    ? past.map(e=>eventRowHtml(e,true)).join('')
+    : '<div class="empty-note">過去の予定はありません。</div>';
+}
+
+/* ---------- scenario: tabbed, searchable list + responsive detail (panel on wide, full page on narrow) ---------- */
+let allLogs = [];
+let filteredLogs = [];
+let shownCount = 20;
+const LOG_PAGE_SIZE = 20;
+let currentDetailIdx = -1;   // index within filteredLogs
+let currentScenarioTab = 'log'; // 'log' (past records) or 'plan' (upcoming / TBD)
+
+function isWideScenario(){ return window.matchMedia('(min-width:901px)').matches; }
+
+function splitLogsByTab(list){
+  const now = new Date(); now.setHours(0,0,0,0);
+  const past = list.filter(l => l.date && new Date(l.date) <= now)
+    .sort((a,b)=> new Date(b.date) - new Date(a.date));
+  const plan = list.filter(l => !l.date || new Date(l.date) > now)
+    .sort((a,b)=>{
+      if(!a.date && !b.date) return 0;
+      if(!a.date) return -1;
+      if(!b.date) return 1;
+      return new Date(a.date) - new Date(b.date);
+    });
+  return { past, plan };
+}
+
+function renderLogs(list){
+  allLogs = list || [];
+  applyScenarioFilter();
+}
+
+function applyScenarioFilter(){
+  const { past, plan } = splitLogsByTab(allLogs);
+  const source = currentScenarioTab === 'plan' ? plan : past;
+  const q = (document.getElementById('scenarioSearch').value || '').trim().toLowerCase();
+  filteredLogs = !q ? source.slice() : source.filter(l => (l.title||'').toLowerCase().includes(q));
+  shownCount = LOG_PAGE_SIZE;
+  currentDetailIdx = -1;
+  document.getElementById('bookPagePanel').innerHTML = '<div class="empty-note" style="padding:70px 16px; text-align:center;">左の一覧から記録を選ぶと、ここに詳細が表示されます。</div>';
+  renderLogListPage();
+}
+
+function isFutureLog(log){
+  if(!log.date) return true;
+  const now = new Date(); now.setHours(0,0,0,0);
+  return new Date(log.date) > now;
+}
+
+function renderLogListPage(){
+  const el = document.getElementById('logList');
+  const wrap = document.getElementById('loadMoreWrap');
+  if(filteredLogs.length===0){
+    el.innerHTML = `<div class="empty-note">${currentScenarioTab==='plan' ? 'まだ予定メモはありません。' : '該当する記録がありません。'}</div>`;
+    wrap.style.display = 'none';
+    return;
+  }
+  const visible = filteredLogs.slice(0, shownCount);
+  el.innerHTML = visible.map((log, idx)=>{
+    const excerpt = (log.content||'').slice(0,44);
+    const more = (log.content||'').length>44 ? '…' : '';
+    const dateLabel = log.date || '日程未定';
+    const tag = isFutureLog(log) ? ' <span class="lr-tag future">予定</span>' : '';
+    const activeCls = idx===currentDetailIdx ? 'active' : '';
+    return `<div class="log-row ${activeCls}" data-idx="${idx}">
+      <span class="lr-date">${dateLabel}${tag}</span>
+      <span class="lr-title">${log.title}</span>
+      <span class="lr-excerpt">${excerpt}${more}</span>
+    </div>`;
+  }).join('');
+  el.querySelectorAll('.log-row').forEach(row=>{
+    row.addEventListener('click', ()=> onLogRowClick(+row.dataset.idx));
+  });
+  wrap.style.display = shownCount < filteredLogs.length ? 'flex' : 'none';
+}
+
+function bookHtml(log){
+  const dateLabel = log.date || '日程未定';
+  const tag = isFutureLog(log) ? ' <span class="lr-tag future">予定</span>' : '';
+  return `
+    <span class="b-date">${dateLabel}${tag}</span>
+    <h3>${log.title}</h3>
+    <p>${(log.content||'').replace(/</g,'&lt;')}</p>`;
+}
+
+function updateDetailNavState(){
+  document.getElementById('prevLog').disabled = currentDetailIdx <= 0;
+  document.getElementById('nextLog').disabled = currentDetailIdx < 0 || currentDetailIdx >= filteredLogs.length-1;
+}
+
+function openDetailAt(idx){
+  const log = filteredLogs[idx];
+  if(!log) return;
+  currentDetailIdx = idx;
+  const html = bookHtml(log);
+  document.getElementById('bookPage').innerHTML = html;
+  document.getElementById('bookPagePanel').innerHTML = html;
+  updateDetailNavState();
+  renderLogListPage();
+}
+
+function onLogRowClick(idx){
+  openDetailAt(idx);
+  if(!isWideScenario()){
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    document.getElementById('page-scenario-detail').classList.add('active');
+    document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active', t.dataset.nav==='scenario'));
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+}
+
+document.querySelectorAll('.s-tab').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    if(btn.classList.contains('active')) return;
+    document.querySelectorAll('.s-tab').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    currentScenarioTab = btn.dataset.tab;
+    document.getElementById('scenarioSearch').value = '';
+    applyScenarioFilter();
+  });
+});
+
+document.getElementById('scenarioSearch').addEventListener('input', applyScenarioFilter);
+document.getElementById('loadMoreBtn').addEventListener('click', ()=>{ shownCount += LOG_PAGE_SIZE; renderLogListPage(); });
+document.getElementById('backToList').addEventListener('click', ()=> goTo('scenario'));
+document.getElementById('prevLog').addEventListener('click', ()=>{ if(currentDetailIdx>0) openDetailAt(currentDetailIdx-1); });
+document.getElementById('nextLog').addEventListener('click', ()=>{ if(currentDetailIdx<filteredLogs.length-1) openDetailAt(currentDetailIdx+1); });
+window.addEventListener('resize', ()=>{
+  if(isWideScenario() && document.getElementById('page-scenario-detail').classList.contains('active')){
+    goTo('scenario');
+  }
+});
+
+/* ==========================================================
+   INIT
+========================================================== */
+async function init(){
+  const profile = (await fetchTable('ruchia_profile', {limit:1}))?.[0] || SAMPLE.profile;
+  renderProfile(profile);
+
+  const news = await fetchTable('ruchia_news', {order:{col:'date', asc:false}, limit:5}) || SAMPLE.news;
+  renderNews(news);
+
+  scheduleData = await fetchTable('ruchia_schedule', {order:{col:'date', asc:true}}) || SAMPLE.schedule;
+  renderCalendar();
+  renderUpcoming(scheduleData);
+
+  const logs = await fetchTable('ruchia_scenario_logs', {order:{col:'date', asc:false}}) || SAMPLE.scenario;
+  renderLogs(logs);
+
+  if(!hasSupabase){
+    console.info('%c[夕星るちあ Portal] Supabase未接続のため、サンプルデータを表示しています。', 'color:#8fb3ee');
+  }
+}
+document.getElementById('calToday').addEventListener('click', ()=>{ currentMonth = new Date(); renderCalendar(); });
+document.getElementById('calPrev').addEventListener('click', ()=>{ currentMonth.setMonth(currentMonth.getMonth()-1); renderCalendar(); });
+document.getElementById('calNext').addEventListener('click', ()=>{ currentMonth.setMonth(currentMonth.getMonth()+1); renderCalendar(); });
+
+init();
+</script>
+</body>
+</html>
