@@ -24,12 +24,12 @@
    0. TOKENS
 ========================================================== */
 :root{
-  --ink-void:   #070b22;
-  --night-deep: #0d1638;
-  --night-mid:  #16224e;
-  --night-card: #1b2a5c;
-  --star-blue:  #8fb3ee;
-  --pale-blue:  #cfe0fa;
+  --ink-void:   #121a4a;
+  --night-deep: #1b2a5e;
+  --night-mid:  #253972;
+  --night-card: #2c4082;
+  --star-blue:  #9dc0f5;
+  --pale-blue:  #dbe8fc;
   --moon-white: #f8fbff;
   --lemon:      #efe9ab;
   --lemon-soft: #f8f4d8;
@@ -37,12 +37,12 @@
   --cat-game:     #c9b8f0;  /* ゲーム：パステル紫 */
   --cat-scenario: #f2acaa;  /* シナリオ：パステル赤 */
   --cat-real:     #cdeef0;  /* リアル：白に近い水色 */
-  --select-bg:    rgba(159,213,255,0.20);
-  --select-border:rgba(196,230,255,0.65);
-  --select-glow:  rgba(159,213,255,0.4);
-  --line-soft:  rgba(207,224,250,0.16);
-  --line-strong:rgba(207,224,250,0.32);
-  --shadow-deep: 0 20px 60px rgba(2,6,23,0.55);
+  --select-bg:    rgba(159,213,255,0.26);
+  --select-border:rgba(196,230,255,0.75);
+  --select-glow:  rgba(159,213,255,0.5);
+  --line-soft:  rgba(219,232,252,0.24);
+  --line-strong:rgba(219,232,252,0.42);
+  --shadow-deep: 0 20px 60px rgba(2,6,23,0.45);
   --radius-lg: 22px;
   --radius-md: 14px;
   --radius-sm: 8px;
@@ -72,9 +72,9 @@ button{ font-family:inherit; cursor:pointer; }
 .sky{
   position:fixed; inset:0; z-index:-3;
   background:
-    radial-gradient(ellipse 90% 60% at 18% 0%, #1c2a63 0%, transparent 55%),
-    radial-gradient(ellipse 70% 50% at 100% 10%, #142253 0%, transparent 60%),
-    radial-gradient(ellipse 120% 80% at 50% 120%, #0a1230 0%, transparent 60%),
+    radial-gradient(ellipse 90% 60% at 18% 0%, #2e4188 0%, transparent 55%),
+    radial-gradient(ellipse 70% 50% at 100% 10%, #243b78 0%, transparent 60%),
+    radial-gradient(ellipse 120% 80% at 50% 120%, #182450 0%, transparent 60%),
     linear-gradient(180deg, var(--ink-void) 0%, var(--night-deep) 45%, var(--ink-void) 100%);
 }
 .stardust{ position:fixed; inset:0; z-index:-2; pointer-events:none; }
@@ -150,7 +150,7 @@ button{ font-family:inherit; cursor:pointer; }
 /* ---- generic card ---- */
 .card{
   position:relative;
-  background:linear-gradient(160deg, rgba(27,42,92,.55), rgba(13,22,56,.65));
+  background:linear-gradient(160deg, rgba(44,64,130,.62), rgba(24,36,86,.7));
   border:1px solid var(--line-soft);
   border-radius:var(--radius-lg);
   box-shadow:var(--shadow-deep);
@@ -204,7 +204,7 @@ h1,h2,h3{ font-family:var(--font-disp-jp); font-weight:700; margin:0; color:var(
 .portrait-frame{
   position:relative; z-index:2; width:82%; height:82%; border-radius:50%;
   border:1px solid var(--line-strong);
-  background:linear-gradient(160deg, rgba(27,42,92,.7), rgba(9,14,38,.85));
+  background:linear-gradient(160deg, rgba(44,64,130,.72), rgba(20,28,72,.85));
   display:flex; align-items:center; justify-content:center; overflow:hidden;
   box-shadow:0 0 60px rgba(143,179,238,.18), inset 0 0 40px rgba(0,0,0,.4);
 }
@@ -282,9 +282,9 @@ h1,h2,h3{ font-family:var(--font-disp-jp); font-weight:700; margin:0; color:var(
 }
 .cal-day.muted{ opacity:.25; }
 .cal-day.today{ border-color:var(--select-border); background:var(--select-bg); color:var(--moon-white); font-weight:700; box-shadow:0 0 0 1px var(--select-glow) inset; }
-.cal-day .glyphs{ display:flex; gap:2px; align-items:center; justify-content:center; height:10px; line-height:1; }
+.cal-day .glyphs{ display:flex; gap:3px; align-items:center; justify-content:center; height:16px; line-height:1; }
 .cal-day .glyphs span{ font-size:8px; }
-.cal-day .glyphs .more{ font-size:7px; color:var(--star-blue); }
+.cal-day .glyphs .more{ font-size:9px; color:var(--star-blue); }
 .cal-legend{ display:flex; gap:18px; margin-top:16px; flex-wrap:wrap; font-size:.66rem; color:var(--pale-blue); }
 .cal-legend-group{ display:flex; gap:12px; flex-wrap:wrap; }
 .cal-legend span.item{ display:inline-flex; align-items:center; gap:5px; }
@@ -297,16 +297,15 @@ h1,h2,h3{ font-family:var(--font-disp-jp); font-weight:700; margin:0; color:var(
 .upcoming-col .scenario-tabs{ margin-bottom:0; }
 .event-row{ display:flex; align-items:center; gap:14px; padding:13px 0; border-bottom:1px dashed var(--line-soft); }
 .event-row:last-child{ border-bottom:none; }
-.event-row.past{ opacity:.5; }
 .event-icon{ width:34px; height:34px; border-radius:50%; border:1px solid var(--line-strong); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
 .event-icon svg{ width:16px; height:16px; color:var(--lemon-vivid); }
 .event-meta{ font-size:.68rem; color:var(--star-blue); letter-spacing:.03em; display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
 .event-title{ font-size:.9rem; margin-top:2px; }
 .event-tag{ display:inline-flex; align-items:center; gap:3px; padding:1px 8px; border-radius:999px; font-size:.62rem; border:1px solid var(--line-strong); }
-.event-done{ font-size:.62rem; color:var(--pale-blue); border:1px solid var(--line-soft); padding:1px 8px; border-radius:999px; }
 .event-body{ flex:1; min-width:0; }
 .event-thumb{ width:34px; height:34px; border-radius:8px; overflow:hidden; flex-shrink:0; border:1px solid var(--line-strong); }
 .event-thumb img{ width:100%; height:100%; object-fit:cover; display:block; }
+.event-right{ display:flex; flex-direction:column; align-items:center; gap:8px; flex-shrink:0; }
 .image-modal{position:fixed; inset:0; background:rgba(0,0,0,.8); display:none; justify-content:center; align-items:center; z-index:9999; }
 .image-modal.show{ display:flex;}
 .image-modal img{ max-width:90%; max-height:90%; border-radius:12px; box-shadow:0 0 30px rgba(0,0,0,.5); cursor:zoom-out;}
@@ -321,10 +320,6 @@ h1,h2,h3{ font-family:var(--font-disp-jp); font-weight:700; margin:0; color:var(
   transition:background .2s ease, border-color .2s ease;
 }
 .event-stream-icon:hover{ background:var(--select-bg); border-color:var(--select-border); }
-.event-endcard{ position:relative; width:44px; height:26px; border-radius:6px; overflow:hidden; border:1px solid var(--line-strong); flex-shrink:0; }
-.event-endcard img{ width:100%; height:100%; object-fit:cover; display:block; }
-.event-endcard span{ position:absolute; bottom:0; right:0; font-size:.5rem; line-height:1.4; background:rgba(0,0,0,.6); color:#fff; padding:0 3px; }
-
 .view-more{ display:inline-flex; align-items:center; gap:6px; font-size:.72rem; letter-spacing:.06em; color:var(--lemon-soft); margin-top:16px; }
 .view-more svg{ width:12px; height:12px; }
 
@@ -372,12 +367,15 @@ h1,h2,h3{ font-family:var(--font-disp-jp); font-weight:700; margin:0; color:var(
   display:inline-block; font-size:.6rem; letter-spacing:.04em; padding:1px 8px; border-radius:999px;
   background:rgba(251,240,122,0.16); color:#fff9b0; border:1px solid rgba(251,240,122,0.45); vertical-align:middle;
 }
-.load-more-wrap{ display:flex; justify-content:center; padding:20px 0 26px; }
-.view-more-btn{
-  padding:10px 26px; border-radius:999px; border:1px solid var(--line-strong); background:transparent;
-  color:var(--pale-blue); font-size:.78rem; letter-spacing:.05em;
+.pagination{ display:flex; align-items:center; justify-content:center; gap:14px; padding:18px 0 8px; }
+.pagination:empty{ display:none; padding:0; }
+.page-btn{
+  padding:8px 20px; border-radius:999px; border:1px solid var(--line-strong); background:transparent;
+  color:var(--pale-blue); font-size:.76rem; letter-spacing:.05em; transition:.2s;
 }
-.view-more-btn:hover{ background:var(--select-bg); color:var(--moon-white); border-color:var(--select-border); }
+.page-btn:hover:not(:disabled){ background:var(--select-bg); color:var(--moon-white); border-color:var(--select-border); }
+.page-btn:disabled{ opacity:.3; cursor:default; }
+.page-info{ font-size:.74rem; color:var(--star-blue); font-family:var(--font-disp-en); letter-spacing:.06em; }
 
 .back-btn{
   display:inline-flex; align-items:center; gap:8px; padding:9px 20px; border-radius:999px;
@@ -394,7 +392,7 @@ h1,h2,h3{ font-family:var(--font-disp-jp); font-weight:700; margin:0; color:var(
 
 .book{ padding:32px; min-height:460px; display:flex; }
 .book-page{
-  flex:1; background:linear-gradient(160deg, rgba(27,42,92,.4), rgba(13,22,56,.55));
+  flex:1; background:linear-gradient(160deg, rgba(44,64,130,.48), rgba(24,36,86,.6));
   color:var(--pale-blue); border-radius:14px; padding:34px 30px;
   border:1px solid var(--line-soft);
   box-shadow:inset 0 0 40px rgba(0,0,0,.18);
@@ -658,7 +656,9 @@ h1,h2,h3{ font-family:var(--font-disp-jp); font-weight:700; margin:0; color:var(
         <div class="card upcoming-card">
           <svg class="card-corner tr" viewBox="0 0 100 100" style="color:var(--lemon-vivid)"><use href="#art-orb"/></svg>
           <div id="upcomingList"><div class="loading-note">今後の予定を読み込み中…</div></div>
+          <div id="upcomingPagination" class="pagination"></div>
           <div id="pastList" style="display:none"><div class="loading-note">過去の予定を読み込み中…</div></div>
+          <div id="pastPagination" class="pagination" style="display:none"></div>
         </div>
       </div>
     </div>
@@ -686,9 +686,7 @@ h1,h2,h3{ font-family:var(--font-disp-jp); font-weight:700; margin:0; color:var(
           <input type="text" id="scenarioSearch" placeholder="タイトルで検索…">
         </div>
         <div class="log-list-full" id="logList"><div class="loading-note">記録を読み込み中…</div></div>
-        <div id="loadMoreWrap" class="load-more-wrap" style="display:none;">
-          <button id="loadMoreBtn" class="view-more-btn">もっと見る</button>
-        </div>
+        <div id="logPagination" class="pagination"></div>
       </div>
 
       <div class="card book scenario-detail-panel" id="scenarioDetailPanel">
@@ -849,7 +847,7 @@ document.querySelectorAll('[data-nav]').forEach(el=>{
      date date, tag text, title text, url text
 
    ruchia_schedule
-     date date (yyyy-mm-dd),                 -- 表示は mm/dd(ddd) に変換
+     date date (yyyy-mm-dd),                 -- 表示は yyyy/mm/dd(ddd) に変換
      time text (hh:mm),
      note_type text        -- 'ゲーム' / 'シナリオ' / 'リアル'
      is_asa boolean, is_hiru boolean, is_yoru boolean, is_shinya boolean
@@ -929,7 +927,6 @@ function renderNews(list){
 let currentMonth = new Date();
 let scheduleData = [];
 
-const CATEGORY_ICON = { 'ゲーム':'#ico-gamepad', 'シナリオ':'#ico-book-open', 'リアル':'#ico-bird' };
 const CATEGORY_COLOR = { 'ゲーム':'var(--cat-game)', 'シナリオ':'var(--cat-scenario)', 'リアル':'var(--cat-real)' };
 const TOD_ORDER = ['asa','hiru','yoru','shinya'];
 const TOD_LABEL = { asa:'朝', hiru:'昼', yoru:'夜', shinya:'深夜' };
@@ -941,19 +938,18 @@ function activeTods(e){
 function categoryColor(e){
   return CATEGORY_COLOR[e.note_type] || 'var(--pale-blue)';
 }
-function fmtDateMDW(iso){
+function fmtDateYMDW(iso){
   const d = new Date(iso);
   if(isNaN(d)) return iso;
   const pad = n => String(n).padStart(2,'0');
   const dow = ['日','月','火','水','木','金','土'][d.getDay()];
-  return `${pad(d.getMonth()+1)}/${pad(d.getDate())}(${dow})`;
+  return `${d.getFullYear()}/${pad(d.getMonth()+1)}/${pad(d.getDate())}(${dow})`;
 }
 
 function eventChip(e){
-  const icon = CATEGORY_ICON[e.note_type] || '#ico-star';
   const color = categoryColor(e);
   const todLabel = activeTods(e).map(t=>TOD_LABEL[t]).join('・');
-  return `<svg width="9" height="9" style="color:${color}" title="${e.note_type||''}・${todLabel}：${e.schedule_title||''}"><use href="${icon}"/></svg>`;
+  return `<svg width="14" height="14" style="color:${color}" title="${e.note_type||''}・${todLabel}：${e.schedule_title||''}"><use href="#ico-star"/></svg>`;
 }
 
 function renderCalendar(){
@@ -1002,7 +998,6 @@ function renderCalendar(){
 }
 
 function eventRowHtml(e, isPast){
-  const icon = CATEGORY_ICON[e.note_type] || '#ico-star';
   const color = categoryColor(e);
   const showExtra = e.note_type==='ゲーム' || e.note_type==='シナリオ';
 
@@ -1010,14 +1005,21 @@ function eventRowHtml(e, isPast){
     `<span class="event-tag" style="color:var(--pale-blue); border-color:var(--line-strong)"><svg width="10" height="10"><use href="${TOD_ICON[t]}"/></svg> ${TOD_LABEL[t]}</span>`
   ).join('');
 
-  const thumb = (showExtra && e.img_thumbnail)
+  const hasThumb = !!(showExtra && e.img_thumbnail);
+  const thumbHtml = hasThumb
     ? `<div class="event-thumb">
         <img src="${e.img_thumbnail}" alt="" onclick="openImage('${e.img_thumbnail}')">
       </div>`
-    : `<div class="event-icon" style="border-color:${color}"><svg style="color:${color}"><use href="${icon}"/></svg></div>`;
+    : '';
+  const starIconHtml = !hasThumb
+    ? `<div class="event-icon" style="border-color:${color}"><svg style="color:${color}"><use href="#ico-star"/></svg></div>`
+    : '';
 
   const contentsHtml = (showExtra && e.contents) ? `<div class="event-contents">${e.contents}</div>` : '';
-  const tableTypeHtml = (e.note_type==='シナリオ' && e.table_type) ? `<span class="event-badge">卓：${e.table_type}</span>` : '';
+  const tableTypeHtml = (e.note_type==='シナリオ' && e.table_type) ? `<span class="event-badge"> ${e.table_type}</span>` : '';
+  const categoryTagHtml = e.note_type
+    ? `<span class="event-tag" style="color:${color}; border-color:${color}"><i class="sw" style="background:${color}"></i> ${e.note_type}</span>`
+    : '';
   const canShowStream =
     e.table_type === "配信卓" &&
     e.stream_type === "公開" &&
@@ -1026,53 +1028,84 @@ function eventRowHtml(e, isPast){
   const streamIconHtml = canShowStream
     ? `<a class="event-stream-icon" href="${e.stream_url}" target="_blank" rel="noopener" title="配信を見る"><svg width="15" height="15"><use href="#ico-yt"/></svg></a>`
     : '';
-  const endcardHtml = (e.note_type==='シナリオ' && e.img_endcard)
-    ? `<div class="event-endcard"><img src="${e.img_endcard}" alt=""><span>ED</span></div>`
+
+  const rightColHtml = (starIconHtml || streamIconHtml)
+    ? `<div class="event-right">${starIconHtml}${streamIconHtml}</div>`
     : '';
-  const linksHtml = endcardHtml ? `<div class="event-links">${endcardHtml}</div>` : '';
 
   return `<div class="event-row ${isPast?'past':''}">
-    ${thumb}
+    ${thumbHtml}
     <div class="event-body">
       <div class="event-meta">
-        ${fmtDateMDW(e.date)} ${e.time||''}
-        <span class="event-tag" style="color:${color}; border-color:${color}"><i class="sw" style="background:${color}"></i> ${e.note_type||''}</span>
+        ${fmtDateYMDW(e.date)} ${e.time||''}
+        ${categoryTagHtml}
         ${todChips}
         ${tableTypeHtml}
-        ${isPast ? '<span class="event-done">終了</span>' : ''}
+        ${streamTypeHtml}
       </div>
       <div class="event-title">${e.schedule_title||''}</div>
       ${contentsHtml}
-      ${linksHtml}
     </div>
-    ${streamIconHtml}
+    ${rightColHtml}
   </div>`;
 }
 
+/* ---------- schedule list pagination ---------- */
+const SCHEDULE_PAGE_SIZE = 20;
+let scheduleLists = { upcoming: [], past: [] };
+let schedulePages = { upcoming: 1, past: 1 };
+
 function renderUpcoming(list){
-  const upEl = document.getElementById('upcomingList');
-  const pastEl = document.getElementById('pastList');
   const now = new Date(); now.setHours(0,0,0,0);
 
-  const upcoming = (list||[]).filter(e=> new Date(e.date) >= now)
+  scheduleLists.upcoming = (list||[]).filter(e=> new Date(e.date) >= now)
     .sort((a,b)=> new Date(a.date)-new Date(b.date));
-  const past = (list||[]).filter(e=> new Date(e.date) < now)
+  scheduleLists.past = (list||[]).filter(e=> new Date(e.date) < now)
     .sort((a,b)=> new Date(b.date)-new Date(a.date));
 
-  upEl.innerHTML = upcoming.length
-    ? upcoming.map(e=>eventRowHtml(e,false)).join('')
-    : '<div class="empty-note">今後の予定はまだ登録されていません。</div>';
+  schedulePages.upcoming = 1;
+  schedulePages.past = 1;
+  renderScheduleTab('upcoming');
+  renderScheduleTab('past');
+}
 
-  pastEl.innerHTML = past.length
-    ? past.map(e=>eventRowHtml(e,true)).join('')
-    : '<div class="empty-note">過去の予定はありません。</div>';
+function renderScheduleTab(kind){
+  const isPast = kind === 'past';
+  const listEl = document.getElementById(isPast ? 'pastList' : 'upcomingList');
+  const pagEl = document.getElementById(isPast ? 'pastPagination' : 'upcomingPagination');
+  const list = scheduleLists[kind];
+
+  if(!list.length){
+    listEl.innerHTML = `<div class="empty-note">${isPast ? '過去の予定はありません。' : '今後の予定はまだ登録されていません。'}</div>`;
+    pagEl.innerHTML = '';
+    return;
+  }
+
+  const totalPages = Math.max(1, Math.ceil(list.length / SCHEDULE_PAGE_SIZE));
+  schedulePages[kind] = Math.min(Math.max(1, schedulePages[kind]), totalPages);
+  const page = schedulePages[kind];
+  const start = (page-1)*SCHEDULE_PAGE_SIZE;
+  const pageItems = list.slice(start, start+SCHEDULE_PAGE_SIZE);
+
+  listEl.innerHTML = pageItems.map(e=>eventRowHtml(e,isPast)).join('');
+  pagEl.innerHTML = totalPages > 1
+    ? `<button class="page-btn" ${page<=1?'disabled':''} onclick="changeSchedulePage('${kind}',${page-1})">‹ 前へ</button>
+       <span class="page-info">${page} / ${totalPages}</span>
+       <button class="page-btn" ${page>=totalPages?'disabled':''} onclick="changeSchedulePage('${kind}',${page+1})">次へ ›</button>`
+    : '';
+}
+
+function changeSchedulePage(kind, page){
+  schedulePages[kind] = page;
+  renderScheduleTab(kind);
+  document.getElementById(kind==='past' ? 'pastList' : 'upcomingList').scrollIntoView({block:'nearest'});
 }
 
 /* ---------- scenario: tabbed, searchable list + responsive detail (panel on wide, full page on narrow) ---------- */
 let allLogs = [];
 let filteredLogs = [];
-let shownCount = 20;
-const LOG_PAGE_SIZE = 20;
+let logPage = 1;
+const LOG_PAGE_SIZE = 50;
 let currentDetailIdx = -1;   // index within filteredLogs
 let currentScenarioTab = 'log'; // 'log' (past records) or 'plan' (upcoming / TBD)
 
@@ -1102,7 +1135,7 @@ function applyScenarioFilter(){
   const source = currentScenarioTab === 'plan' ? plan : past;
   const q = (document.getElementById('scenarioSearch').value || '').trim().toLowerCase();
   filteredLogs = !q ? source.slice() : source.filter(l => (l.title||'').toLowerCase().includes(q));
-  shownCount = LOG_PAGE_SIZE;
+  logPage = 1;
   currentDetailIdx = -1;
   document.getElementById('bookPagePanel').innerHTML = '<div class="empty-note" style="padding:70px 16px; text-align:center;">左の一覧から記録を選ぶと、ここに詳細が表示されます。</div>';
   renderLogListPage();
@@ -1116,14 +1149,19 @@ function isFutureLog(log){
 
 function renderLogListPage(){
   const el = document.getElementById('logList');
-  const wrap = document.getElementById('loadMoreWrap');
+  const pagEl = document.getElementById('logPagination');
   if(filteredLogs.length===0){
     el.innerHTML = `<div class="empty-note">${currentScenarioTab==='plan' ? 'まだ予定メモはありません。' : '該当する記録がありません。'}</div>`;
-    wrap.style.display = 'none';
+    pagEl.innerHTML = '';
     return;
   }
-  const visible = filteredLogs.slice(0, shownCount);
-  el.innerHTML = visible.map((log, idx)=>{
+  const totalPages = Math.max(1, Math.ceil(filteredLogs.length / LOG_PAGE_SIZE));
+  logPage = Math.min(Math.max(1, logPage), totalPages);
+  const start = (logPage-1) * LOG_PAGE_SIZE;
+  const visible = filteredLogs.slice(start, start+LOG_PAGE_SIZE);
+
+  el.innerHTML = visible.map((log, i)=>{
+    const idx = start + i;
     const excerpt = (log.content||'').slice(0,44);
     const more = (log.content||'').length>44 ? '…' : '';
     const dateLabel = log.date || '日程未定';
@@ -1138,7 +1176,16 @@ function renderLogListPage(){
   el.querySelectorAll('.log-row').forEach(row=>{
     row.addEventListener('click', ()=> onLogRowClick(+row.dataset.idx));
   });
-  wrap.style.display = shownCount < filteredLogs.length ? 'flex' : 'none';
+
+  pagEl.innerHTML = totalPages > 1
+    ? `<button class="page-btn" id="logPrevPage" ${logPage<=1?'disabled':''}>‹ 前へ</button>
+       <span class="page-info">${logPage} / ${totalPages}</span>
+       <button class="page-btn" id="logNextPage" ${logPage>=totalPages?'disabled':''}>次へ ›</button>`
+    : '';
+  const prevBtn = document.getElementById('logPrevPage');
+  const nextBtn = document.getElementById('logNextPage');
+  if(prevBtn) prevBtn.addEventListener('click', ()=>{ logPage--; renderLogListPage(); });
+  if(nextBtn) nextBtn.addEventListener('click', ()=>{ logPage++; renderLogListPage(); });
 }
 
 function bookHtml(log){
@@ -1159,6 +1206,7 @@ function openDetailAt(idx){
   const log = filteredLogs[idx];
   if(!log) return;
   currentDetailIdx = idx;
+  logPage = Math.floor(idx / LOG_PAGE_SIZE) + 1;
   const html = bookHtml(log);
   document.getElementById('bookPage').innerHTML = html;
   document.getElementById('bookPagePanel').innerHTML = html;
@@ -1182,7 +1230,9 @@ document.querySelectorAll('#scheduleTabs .s-tab').forEach(btn=>{
     btn.classList.add('active');
     const isUpcoming = btn.dataset.scheduleTab === 'upcoming';
     document.getElementById('upcomingList').style.display = isUpcoming ? '' : 'none';
+    document.getElementById('upcomingPagination').style.display = isUpcoming ? '' : 'none';
     document.getElementById('pastList').style.display = isUpcoming ? 'none' : '';
+    document.getElementById('pastPagination').style.display = isUpcoming ? 'none' : '';
   });
 });
 
@@ -1198,7 +1248,6 @@ document.querySelectorAll('.scenario-tabs:not(#scheduleTabs) .s-tab').forEach(bt
 });
 
 document.getElementById('scenarioSearch').addEventListener('input', applyScenarioFilter);
-document.getElementById('loadMoreBtn').addEventListener('click', ()=>{ shownCount += LOG_PAGE_SIZE; renderLogListPage(); });
 document.getElementById('backToList').addEventListener('click', ()=> goTo('scenario'));
 document.getElementById('prevLog').addEventListener('click', ()=>{ if(currentDetailIdx>0) openDetailAt(currentDetailIdx-1); });
 document.getElementById('nextLog').addEventListener('click', ()=>{ if(currentDetailIdx<filteredLogs.length-1) openDetailAt(currentDetailIdx+1); });
