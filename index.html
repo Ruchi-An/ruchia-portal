@@ -34,9 +34,9 @@
   --lemon:      #efe9ab;
   --lemon-soft: #f8f4d8;
   --lemon-vivid:#fbf07a;
-  --cat-game:     #c9b8f0;  /* ゲーム：パステル紫 */
-  --cat-scenario: #f2acaa;  /* シナリオ：パステル赤 */
-  --cat-real:     #cdeef0;  /* リアル：白に近い水色 */
+  --cat-game:     #ae98ff;  /* ゲーム：パステル紫 */
+  --cat-scenario: #f6ff77;  /* シナリオ：パステル赤 */
+  --cat-real:     #a0cbff;  /* リアル：白に近い水色 */
   --select-bg:    rgba(159,213,255,0.26);
   --select-border:rgba(196,230,255,0.75);
   --select-glow:  rgba(159,213,255,0.5);
@@ -320,6 +320,20 @@ h1,h2,h3{ font-family:var(--font-disp-jp); font-weight:700; margin:0; color:var(
   transition:background .2s ease, border-color .2s ease;
 }
 .event-stream-icon:hover{ background:var(--select-bg); border-color:var(--select-border); }
+.event-link-icon{
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  width:26px; height:26px; border-radius:50%;
+  border:1px solid var(--line-strong); color:var(--lemon-vivid);
+  transition:background .2s ease, border-color .2s ease;
+}
+.event-link-icon:hover{ background:var(--select-bg); border-color:var(--select-border); }
+.event-link-icon.disabled{ color:var(--line-strong); opacity:.45; cursor:default; pointer-events:none; }
+.event-link-dash{
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  width:26px; height:26px; border-radius:50%;
+  border:1px dashed var(--line-strong); color:var(--star-blue);
+  font-size:.75rem; opacity:.6;
+}
 .view-more{ display:inline-flex; align-items:center; gap:6px; font-size:.72rem; letter-spacing:.06em; color:var(--lemon-soft); margin-top:16px; }
 .view-more svg{ width:12px; height:12px; }
 
@@ -363,6 +377,67 @@ h1,h2,h3{ font-family:var(--font-disp-jp); font-weight:700; margin:0; color:var(
 .log-row .lr-date{ font-size:.66rem; color:var(--star-blue); font-family:var(--font-disp-en); }
 .log-row .lr-title{ font-size:.9rem; color:var(--moon-white); }
 .log-row .lr-excerpt{ grid-column:2; font-size:.76rem; color:var(--pale-blue); opacity:.75; margin-top:2px; }
+.scenario-genre{
+  font-size:.64rem; letter-spacing:.04em; padding:2px 8px; border-radius:999px;
+  border:1px solid var(--line-strong); color:var(--lemon-vivid);
+}
+.lr-meta{
+  grid-column:2;
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:4px;
+}
+.lr-thumb{
+  width:38px;
+  height:38px;
+  border-radius:8px;
+  overflow:hidden;
+  border:1px solid var(--line-strong);
+  flex-shrink:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:var(--star-blue);
+  background:rgba(255,255,255,.03);
+}
+.lr-thumb img{ width:100%; height:100%; object-fit:cover; display:block; }
+.lr-link-mini{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:26px;
+  height:26px;
+  border-radius:50%;
+  border:1px solid var(--line-strong);
+  color:var(--lemon-vivid);
+}
+.lr-link-mini:hover{ background:var(--select-bg); border-color:var(--select-border); }
+.lr-link-mini.disabled{ color:var(--line-strong); opacity:.45; pointer-events:none; }
+.scenario-detail-stack{ display:flex; flex-direction:column; gap:12px; }
+.scenario-detail-grid{ display:grid; grid-template-columns:180px 1fr; gap:8px 14px; }
+.scenario-detail-grid .k{ color:var(--star-blue); font-size:.78rem; }
+.scenario-detail-grid .v{ color:var(--pale-blue); font-size:.84rem; line-height:1.8; white-space:pre-wrap; word-break:break-word; }
+.scenario-endcard{
+  width:100%;
+  max-width:360px;
+  border-radius:10px;
+  border:1px solid var(--line-strong);
+  display:block;
+}
+.scenario-trailer{
+  width:100%;
+  max-width:360px;
+  border-radius:10px;
+  border:1px solid var(--line-strong);
+  display:block;
+  transition:.2s;
+}
+a:hover > .scenario-trailer{ opacity:.85; border-color:var(--select-border); }
+@media(max-width:900px){
+  .scenario-detail-grid{ grid-template-columns:1fr; gap:4px 0; }
+}
 .lr-tag.future{
   display:inline-block; font-size:.6rem; letter-spacing:.04em; padding:1px 8px; border-radius:999px;
   background:rgba(251,240,122,0.16); color:#fff9b0; border:1px solid rgba(251,240,122,0.45); vertical-align:middle;
@@ -455,18 +530,22 @@ h1,h2,h3{ font-family:var(--font-disp-jp); font-weight:700; margin:0; color:var(
   <symbol id="ico-cross" viewBox="0 0 24 24"><path d="M12 4v6M4 12h6M14 12h6M12 14v6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><circle cx="12" cy="12" r="2" fill="currentColor"/></symbol>
 
   <!-- Lucide-style category icons -->
-  <symbol id="ico-gamepad" viewBox="0 0 24 24">
+  <symbol id="ico-gamepad" viewBox="0 0 22 22">
     <path d="M6 11h4M8 9v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
     <circle cx="15" cy="10.5" r="0.9" fill="currentColor"/>
     <circle cx="17.5" cy="13" r="0.9" fill="currentColor"/>
     <path d="M8.5 6h7c3 0 5 2.3 5 5.5v2.2c0 2-1.5 3.3-3.2 2.7-.7-.3-1.2-.9-1.7-1.6l-.6-.9a2.6 2.6 0 00-2.2-1.2h-1.6a2.6 2.6 0 00-2.2 1.2l-.6.9c-.5.7-1 1.3-1.7 1.6-1.7.6-3.2-.7-3.2-2.7v-2.2C3.5 8.3 5.5 6 8.5 6z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round"/>
   </symbol>
-  <symbol id="ico-book-open" viewBox="0 0 24 24">
+  <symbol id="ico-camera" viewBox="0 0 22 22">
+    <path d="M4 8.2h2.3l1.3-1.7h6.8l1.3 1.7H18a1.6 1.6 0 011.6 1.6v7.3A1.6 1.6 0 0118 18.7H4a1.6 1.6 0 01-1.6-1.6V9.8A1.6 1.6 0 014 8.2z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+    <circle cx="11" cy="13" r="3" fill="none" stroke="currentColor" stroke-width="1.4"/>
+  </symbol>
+  <symbol id="ico-book-open" viewBox="0 0 22 22">
     <path d="M12 6.5c-1.6-1.3-3.7-2-6.3-2A2 2 0 004 6.4v10.3c0 .8.7 1.4 1.5 1.3 2.2-.3 4.7.2 6.5 1.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
     <path d="M12 6.5c1.6-1.3 3.7-2 6.3-2A2 2 0 0120 6.4v10.3c0 .8-.7 1.4-1.5 1.3-2.2-.3-4.7.2-6.5 1.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
     <path d="M12 6.5v13" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
   </symbol>
-  <symbol id="ico-bird" viewBox="0 0 24 24">
+  <symbol id="ico-bird" viewBox="0 0 22 22">
     <path d="M16 7a3 3 0 013 3c0 3-2 4.5-4.5 5.3M16 7a3 3 0 00-3 3c0 .7.1 1.3.3 1.9M16 7c-3 0-6 1.3-8 3.6M8 10.6c-1.5.4-3 .3-4-.3.6 1.8 2 3 3.7 3.4M8 10.6c0 3 1.6 5.6 4 6.9-1 .6-2.3 1-3.5 1M14.5 15.3c-1.6 2-4 3.2-6.6 3.6" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
     <circle cx="16.3" cy="8.3" r="0.6" fill="currentColor"/>
   </symbol>
@@ -674,16 +753,16 @@ h1,h2,h3{ font-family:var(--font-disp-jp); font-weight:700; margin:0; color:var(
   <section class="page" id="page-scenario">
     <div class="section-title"><h2>SCENARIO <span class="jp-small" style="color:var(--pale-blue); font-size:.85rem; font-family:var(--font-body); margin-left:8px;">シナリオ通過報告</span></h2><div class="line"></div></div>
 
-    <div class="scenario-tabs">
-      <button class="s-tab active" data-tab="log"><svg width="13" height="13"><use href="#ico-book-open"/></svg>STORY LOG<span class="jp-small">・記録一覧</span></button>
-      <button class="s-tab" data-tab="plan"><svg width="13" height="13"><use href="#ico-star"/></svg>PLAN NOTE<span class="jp-small">・予定メモ</span></button>
+    <div class="scenario-tabs" id="scenarioListTabs">
+      <button class="s-tab active" data-scenario-tab="log"><svg width="13" height="13"><use href="#ico-book-open"/></svg>STORY LOG<span class="jp-small">・通過実績</span></button>
+      <button class="s-tab" data-scenario-tab="plan"><svg width="13" height="13"><use href="#ico-calendar"/></svg>PLAN NOTE<span class="jp-small">・通過予定</span></button>
     </div>
 
     <div class="scenario-layout">
       <div class="card scenario-list-card">
         <svg class="card-corner tl" viewBox="0 0 100 100" style="color:var(--star-blue)"><use href="#art-orb"/></svg>
         <div class="scenario-toolbar">
-          <input type="text" id="scenarioSearch" placeholder="タイトルで検索…">
+          <input type="text" id="scenarioSearch" placeholder="シナリオ名・ジャンルで検索…">
         </div>
         <div class="log-list-full" id="logList"><div class="loading-note">記録を読み込み中…</div></div>
         <div id="logPagination" class="pagination"></div>
@@ -850,20 +929,42 @@ document.querySelectorAll('[data-nav]').forEach(el=>{
      date date (yyyy-mm-dd),                 -- 表示は yyyy/mm/dd(ddd) に変換
      time text (hh:mm),
      note_type text        -- 'ゲーム' / 'シナリオ' / 'リアル'
+     role text             -- 'PL' など
      is_asa boolean, is_hiru boolean, is_yoru boolean, is_shinya boolean
                             -- 朝・昼・夜・深夜。複数 true の可能性あり
      schedule_title text,
      contents text,         -- ゲーム・シナリオのみ
+     contents_url text,     -- コンテンツURL（ico-gamepadリンク先）
      table_type text,       -- シナリオのみ
      stream_type text,      -- ゲーム・シナリオのみ
      stream_url text,       -- ゲーム・シナリオのみ
      img_thumbnail text,    -- ゲーム・シナリオのみ（Storage の画像URL）
      img_endcard text       -- シナリオのみ（Storage の画像URL）
 
-   ruchia_scenario_logs
-     date date (nullable), title text, content text
-     -- date が過去 → STORY LOG（記録一覧）タブに表示
-     -- date が未来、または date が null（日程未定） → PLAN NOTE（予定メモ）タブに表示
+   ruchia_contents_scenario
+     scenario_name text,
+     official_link text,
+     genre text,
+     production text,
+     production_link text,
+     author text,
+     author_link text,
+     has_gm boolean,
+     player_count text,
+     duration text,
+     synopsis text,
+     overview text,
+     tags text[],
+     gm_available boolean,
+     trailer_image_url text,
+     gm_count integer,
+     obsidian_path text
+
+   ruchia_contents_game
+     game_name text,
+     official_link text
+     -- ruchia_schedule.contents と game_name が一致した場合、
+     -- SCHEDULEページのコンテンツリンクとして official_link を表示
 ========================================================== */
 const hasSupabase = !!(window.SUPABASE_URL && window.SUPABASE_ANON_KEY);
 const sb = hasSupabase ? supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY) : null;
@@ -926,6 +1027,25 @@ function renderNews(list){
 /* ---------- render: schedule (calendar + upcoming/past) ---------- */
 let currentMonth = new Date();
 let scheduleData = [];
+let scenarioContentMap = new Map();
+let gameContentMap = new Map();
+
+function buildContentMap(list, nameField){
+  const map = new Map();
+  (list || []).forEach(c=>{
+    const key = normalizeKey(c[nameField]);
+    if(key) map.set(key, c);
+  });
+  return map;
+}
+
+function officialLinkForEvent(e){
+  const key = normalizeKey(e.contents);
+  if(!key) return '';
+  if(e.note_type === 'ゲーム') return safeUrl(gameContentMap.get(key)?.official_link);
+  if(e.note_type === 'シナリオ') return safeUrl(scenarioContentMap.get(key)?.official_link);
+  return '';
+}
 
 const CATEGORY_COLOR = { 'ゲーム':'var(--cat-game)', 'シナリオ':'var(--cat-scenario)', 'リアル':'var(--cat-real)' };
 const TOD_ORDER = ['asa','hiru','yoru','shinya'];
@@ -1005,43 +1125,45 @@ function eventRowHtml(e, isPast){
     `<span class="event-tag" style="color:var(--pale-blue); border-color:var(--line-strong)"><svg width="10" height="10"><use href="${TOD_ICON[t]}"/></svg> ${TOD_LABEL[t]}</span>`
   ).join('');
 
-  const hasThumb = !!(showExtra && e.img_thumbnail);
-  const thumbHtml = hasThumb
+  const hasThumb = !!e.img_thumbnail;
+  const leftHtml = hasThumb
     ? `<div class="event-thumb">
         <img src="${e.img_thumbnail}" alt="" onclick="openImage('${e.img_thumbnail}')">
       </div>`
-    : '';
-  const starIconHtml = !hasThumb
-    ? `<div class="event-icon" style="border-color:${color}"><svg style="color:${color}"><use href="#ico-star"/></svg></div>`
-    : '';
+    : `<div class="event-icon" style="border-color:${color}"><svg style="color:${color}"><use href="#ico-star"/></svg></div>`;
 
   const contentsHtml = (showExtra && e.contents) ? `<div class="event-contents">${e.contents}</div>` : '';
-  const tableTypeHtml = (e.note_type==='シナリオ' && e.table_type) ? `<span class="event-badge"> ${e.table_type}</span>` : '';
+  const tableTypeHtml = (e.note_type==='シナリオ' && e.table_type) ? `<span class="event-badge">${e.table_type}</span>` : '';
   const categoryTagHtml = e.note_type
     ? `<span class="event-tag" style="color:${color}; border-color:${color}"><i class="sw" style="background:${color}"></i> ${e.note_type}</span>`
     : '';
+
+  const contentsUrl = officialLinkForEvent(e) || e.contents_url || '';
+  const contentsIcon = e.note_type === "シナリオ" ? "ico-book-open" : "ico-gamepad";
+
+  const gamepadHtml = contentsUrl
+    ? `<a class="event-link-icon" href="${contentsUrl}" target="_blank" rel="noopener" title="コンテンツを見る"><svg width="14" height="14"><use href="#${contentsIcon}"/></svg></a>`
+    : `<span class="event-link-icon disabled" title="コンテンツURL未設定"><svg width="14" height="14"><use href="#${contentsIcon}"/></svg></span>`;
+
+  const streamUrl = e.stream_url || '';
   const canShowStream =
     e.table_type === "配信卓" &&
-    e.stream_type === "公開" &&
-    e.stream_url;
+    e.stream_type === "公開";
 
-  const streamIconHtml = canShowStream
-    ? `<a class="event-stream-icon" href="${e.stream_url}" target="_blank" rel="noopener" title="配信を見る"><svg width="15" height="15"><use href="#ico-yt"/></svg></a>`
-    : '';
+  const cameraHtml = canShowStream && streamUrl
+    ? `<a class="event-link-icon" href="${streamUrl}" target="_blank" rel="noopener" title="配信を見る"><svg width="14" height="14"><use href="#ico-camera"/></svg></a>`
+    : `<span class="event-link-icon disabled" title="配信URL未設定"><svg width="14" height="14"><use href="#ico-camera"/></svg></span>`;
 
-  const rightColHtml = (starIconHtml || streamIconHtml)
-    ? `<div class="event-right">${starIconHtml}${streamIconHtml}</div>`
-    : '';
+  const rightColHtml = `<div class="event-right">${gamepadHtml}${cameraHtml}</div>`;
 
   return `<div class="event-row ${isPast?'past':''}">
-    ${thumbHtml}
+    ${leftHtml}
     <div class="event-body">
       <div class="event-meta">
         ${fmtDateYMDW(e.date)} ${e.time||''}
         ${categoryTagHtml}
         ${todChips}
         ${tableTypeHtml}
-        ${streamTypeHtml}
       </div>
       <div class="event-title">${e.schedule_title||''}</div>
       ${contentsHtml}
@@ -1101,76 +1223,126 @@ function changeSchedulePage(kind, page){
   document.getElementById(kind==='past' ? 'pastList' : 'upcomingList').scrollIntoView({block:'nearest'});
 }
 
-/* ---------- scenario: tabbed, searchable list + responsive detail (panel on wide, full page on narrow) ---------- */
-let allLogs = [];
-let filteredLogs = [];
+/* ---------- scenario: PL records from schedule + content master ---------- */
+let allScenarioRecords = [];
+let filteredScenarioRecords = [];
 let logPage = 1;
 const LOG_PAGE_SIZE = 50;
-let currentDetailIdx = -1;   // index within filteredLogs
-let currentScenarioTab = 'log'; // 'log' (past records) or 'plan' (upcoming / TBD)
+let currentDetailIdx = -1;
 
-function isWideScenario(){ return window.matchMedia('(min-width:901px)').matches; }
-
-function splitLogsByTab(list){
-  const now = new Date(); now.setHours(0,0,0,0);
-  const past = list.filter(l => l.date && new Date(l.date) <= now)
-    .sort((a,b)=> new Date(b.date) - new Date(a.date));
-  const plan = list.filter(l => !l.date || new Date(l.date) > now)
-    .sort((a,b)=>{
-      if(!a.date && !b.date) return 0;
-      if(!a.date) return -1;
-      if(!b.date) return 1;
-      return new Date(a.date) - new Date(b.date);
-    });
-  return { past, plan };
+function esc(v){
+  return String(v ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
-function renderLogs(list){
-  allLogs = list || [];
+function safeUrl(url){
+  if(!url) return '';
+  try{
+    const u = new URL(url, window.location.href);
+    if(u.protocol === 'http:' || u.protocol === 'https:') return u.href;
+  }catch(_e){
+  }
+  return '';
+}
+
+function normalizeKey(s){
+  return String(s || '').trim().toLowerCase();
+}
+
+function boolJa(v){
+  if(v === true) return 'あり';
+  if(v === false) return 'なし';
+  return '-';
+}
+
+function buildScenarioRecords(scheduleList, contentList){
+  const contentMap = scenarioContentMap.size ? scenarioContentMap : buildContentMap(contentList, 'scenario_name');
+  const now = new Date(); now.setHours(0,0,0,0);
+
+  const records = (scheduleList || [])
+    .filter(s=> String(s.role || '').toUpperCase() === 'PL')
+    .filter(s=> !!String(s.contents || '').trim())
+    .map(s=>{
+      const content = contentMap.get(normalizeKey(s.contents)) || null;
+      const date = s.date || null;
+      return {
+        date,
+        scenario_name: content?.scenario_name || s.contents || '-',
+        genre: content?.genre || '-',
+        role: s.role || '-',
+        stream_url: s.stream_url || '',
+        thumbnail_url: s.img_thumbnail || '',
+        endcard_url: s.img_endcard || '',
+        official_link: content?.official_link || '',
+        isFuture: date ? (new Date(date) >= now) : false,
+        passNumber: null,
+        schedule: s,
+        content
+      };
+    });
+
+  /* 通過数：通過日の古い順に連番を振る（日付未定のものは対象外） */
+  const dated = records.filter(r=>r.date).sort((a,b)=> new Date(a.date)-new Date(b.date));
+  dated.forEach((r,i)=>{ r.passNumber = i+1; });
+
+  return records;
+}
+
+function renderScenarioRecords(list){
+  allScenarioRecords = list || [];
   applyScenarioFilter();
 }
 
+function isWideScenario(){ return window.matchMedia('(min-width:901px)').matches; }
+
+let scenarioTab = 'log';
+
 function applyScenarioFilter(){
-  const { past, plan } = splitLogsByTab(allLogs);
-  const source = currentScenarioTab === 'plan' ? plan : past;
   const q = (document.getElementById('scenarioSearch').value || '').trim().toLowerCase();
-  filteredLogs = !q ? source.slice() : source.filter(l => (l.title||'').toLowerCase().includes(q));
+  const source = allScenarioRecords.filter(r => scenarioTab === 'plan' ? r.isFuture : !r.isFuture);
+  const filtered = !q ? source.slice() : source.filter(r=>{
+    return [r.scenario_name, r.genre].some(v => String(v || '').toLowerCase().includes(q));
+  });
+  filtered.sort((a,b)=>{
+    if(!a.date && !b.date) return 0;
+    if(!a.date) return 1;
+    if(!b.date) return -1;
+    const diff = new Date(a.date) - new Date(b.date);
+    return scenarioTab === 'plan' ? diff : -diff;
+  });
+  filteredScenarioRecords = filtered;
   logPage = 1;
   currentDetailIdx = -1;
   document.getElementById('bookPagePanel').innerHTML = '<div class="empty-note" style="padding:70px 16px; text-align:center;">左の一覧から記録を選ぶと、ここに詳細が表示されます。</div>';
   renderLogListPage();
 }
 
-function isFutureLog(log){
-  if(!log.date) return true;
-  const now = new Date(); now.setHours(0,0,0,0);
-  return new Date(log.date) > now;
-}
-
 function renderLogListPage(){
   const el = document.getElementById('logList');
   const pagEl = document.getElementById('logPagination');
-  if(filteredLogs.length===0){
-    el.innerHTML = `<div class="empty-note">${currentScenarioTab==='plan' ? 'まだ予定メモはありません。' : '該当する記録がありません。'}</div>`;
+  if(filteredScenarioRecords.length===0){
+    el.innerHTML = `<div class="empty-note">${scenarioTab==='plan' ? '通過予定の記録がありません。' : 'PL通過記録がありません。'}</div>`;
     pagEl.innerHTML = '';
     return;
   }
-  const totalPages = Math.max(1, Math.ceil(filteredLogs.length / LOG_PAGE_SIZE));
+  const totalPages = Math.max(1, Math.ceil(filteredScenarioRecords.length / LOG_PAGE_SIZE));
   logPage = Math.min(Math.max(1, logPage), totalPages);
   const start = (logPage-1) * LOG_PAGE_SIZE;
-  const visible = filteredLogs.slice(start, start+LOG_PAGE_SIZE);
+  const visible = filteredScenarioRecords.slice(start, start+LOG_PAGE_SIZE);
 
   el.innerHTML = visible.map((log, i)=>{
     const idx = start + i;
-    const excerpt = (log.content||'').slice(0,44);
-    const more = (log.content||'').length>44 ? '…' : '';
-    const dateLabel = log.date || '日程未定';
-    const tag = isFutureLog(log) ? ' <span class="lr-tag future">予定</span>' : '';
+    const dateLabel = log.date ? fmtDateYMDW(log.date) : '日程未定';
+    const numLabel = log.passNumber ? `No.${log.passNumber}` : '-';
     const activeCls = idx===currentDetailIdx ? 'active' : '';
     return `<div class="log-row ${activeCls}" data-idx="${idx}">
-      <span class="lr-date">${dateLabel}${tag}</span>
-      <span class="lr-title">${log.title}</span>
-      <span class="lr-excerpt">${excerpt}${more}</span>
+      <span class="lr-date">${dateLabel}</span>
+      <span class="lr-title">${esc(log.scenario_name)} <span class="scenario-genre">${esc(log.genre || '-')}</span></span>
+      <span class="lr-excerpt">通過数: ${numLabel}</span>
     </div>`;
   }).join('');
   el.querySelectorAll('.log-row').forEach(row=>{
@@ -1189,21 +1361,62 @@ function renderLogListPage(){
 }
 
 function bookHtml(log){
-  const dateLabel = log.date || '日程未定';
-  const tag = isFutureLog(log) ? ' <span class="lr-tag future">予定</span>' : '';
+  const dateLabel = log.date ? fmtDateYMDW(log.date) : '日程未定';
+  const c = log.content || {};
+  const tags = Array.isArray(c.tags) ? c.tags.join(', ') : '-';
+  const endcard = safeUrl(log.endcard_url);
+  const officialLink = safeUrl(c.official_link);
+  const trailerImg = safeUrl(c.trailer_image_url);
+  const numLabel = log.passNumber ? `No.${log.passNumber}` : '-';
+
+  const detail = [
+    ['通過日', dateLabel],
+    ['通過数', numLabel],
+    ['シナリオ名', log.scenario_name || '-'],
+    ['ジャンル', c.genre || log.genre || '-'],
+    ['制作', c.production ? `${esc(c.production)}${safeUrl(c.production_link) ? ` (<a href="${esc(safeUrl(c.production_link))}" target="_blank" rel="noopener">link</a>)` : ''}` : '-'],
+    ['作者', c.author ? `${esc(c.author)}${safeUrl(c.author_link) ? ` (<a href="${esc(safeUrl(c.author_link))}" target="_blank" rel="noopener">link</a>)` : ''}` : '-'],
+    ['GM有無', boolJa(c.has_gm)],
+    ['GM可否', boolJa(c.gm_available)],
+    ['GM回数', c.gm_count ?? '-'],
+    ['人数', c.player_count || '-'],
+    ['時間', c.duration || '-'],
+    ['タグ', esc(tags || '-')],
+    ['あらすじ', esc(c.synopsis || '-')],
+    ['概要', esc(c.overview || '-')],
+    ['Obsidian path', esc(c.obsidian_path || '-')],
+    ['配信URL', safeUrl(log.stream_url) ? `<a href="${esc(safeUrl(log.stream_url))}" target="_blank" rel="noopener">${esc(safeUrl(log.stream_url))}</a>` : '未設定']
+  ];
+
+  const detailHtml = detail.map(([k,v])=>`<span class="k">${k}</span><span class="v">${v}</span>`).join('');
+
+  const officialBlock = trailerImg
+    ? `<div><div class="k" style="margin-bottom:6px; color:var(--star-blue); font-size:.78rem;">公式サイト</div><a href="${esc(officialLink || trailerImg)}" target="_blank" rel="noopener" title="公式サイトを開く"><img class="scenario-trailer" src="${esc(trailerImg)}" alt="${esc(log.scenario_name)} トレーラー"></a></div>`
+    : (officialLink
+        ? `<div><div class="k" style="margin-bottom:6px; color:var(--star-blue); font-size:.78rem;">公式サイト</div><div class="v"><a href="${esc(officialLink)}" target="_blank" rel="noopener">${esc(officialLink)}</a></div></div>`
+        : `<div><div class="k" style="margin-bottom:6px; color:var(--star-blue); font-size:.78rem;">公式サイト</div><div class="v">未設定</div></div>`);
+
+  const endcardBlock = endcard
+    ? `<div><div class="k" style="margin-bottom:6px; color:var(--star-blue); font-size:.78rem;">エンドカード</div><img class="scenario-endcard" src="${esc(endcard)}" alt="endcard"></div>`
+    : `<div><div class="k" style="margin-bottom:6px; color:var(--star-blue); font-size:.78rem;">エンドカード</div><div class="v">未設定</div></div>`;
+
   return `
-    <span class="b-date">${dateLabel}${tag}</span>
-    <h3>${log.title}</h3>
-    <p>${(log.content||'').replace(/</g,'&lt;')}</p>`;
+    <span class="b-date">${dateLabel}</span>
+    <h3>${esc(log.scenario_name)}</h3>
+    <div class="scenario-detail-stack">
+      ${officialBlock}
+      ${endcardBlock}
+      <div class="scenario-detail-grid">${detailHtml}</div>
+    </div>`;
 }
 
 function updateDetailNavState(){
   document.getElementById('prevLog').disabled = currentDetailIdx <= 0;
-  document.getElementById('nextLog').disabled = currentDetailIdx < 0 || currentDetailIdx >= filteredLogs.length-1;
+  document.getElementById('nextLog').disabled = currentDetailIdx < 0 || currentDetailIdx >= filteredScenarioRecords.length-1;
 }
 
 function openDetailAt(idx){
-  const log = filteredLogs[idx];
+  const log = filteredScenarioRecords[idx];
   if(!log) return;
   currentDetailIdx = idx;
   logPage = Math.floor(idx / LOG_PAGE_SIZE) + 1;
@@ -1236,13 +1449,11 @@ document.querySelectorAll('#scheduleTabs .s-tab').forEach(btn=>{
   });
 });
 
-document.querySelectorAll('.scenario-tabs:not(#scheduleTabs) .s-tab').forEach(btn=>{
+document.querySelectorAll('#scenarioListTabs .s-tab').forEach(btn=>{
   btn.addEventListener('click', ()=>{
-    if(btn.classList.contains('active')) return;
-    document.querySelectorAll('.scenario-tabs:not(#scheduleTabs) .s-tab').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('#scenarioListTabs .s-tab').forEach(b=>b.classList.remove('active'));
     btn.classList.add('active');
-    currentScenarioTab = btn.dataset.tab;
-    document.getElementById('scenarioSearch').value = '';
+    scenarioTab = btn.dataset.scenarioTab;
     applyScenarioFilter();
   });
 });
@@ -1250,7 +1461,7 @@ document.querySelectorAll('.scenario-tabs:not(#scheduleTabs) .s-tab').forEach(bt
 document.getElementById('scenarioSearch').addEventListener('input', applyScenarioFilter);
 document.getElementById('backToList').addEventListener('click', ()=> goTo('scenario'));
 document.getElementById('prevLog').addEventListener('click', ()=>{ if(currentDetailIdx>0) openDetailAt(currentDetailIdx-1); });
-document.getElementById('nextLog').addEventListener('click', ()=>{ if(currentDetailIdx<filteredLogs.length-1) openDetailAt(currentDetailIdx+1); });
+document.getElementById('nextLog').addEventListener('click', ()=>{ if(currentDetailIdx<filteredScenarioRecords.length-1) openDetailAt(currentDetailIdx+1); });
 window.addEventListener('resize', ()=>{
   if(isWideScenario() && document.getElementById('page-scenario-detail').classList.contains('active')){
     goTo('scenario');
@@ -1270,18 +1481,26 @@ function closeImage(){
    INIT
 ========================================================== */
 async function init(){
-  const profile = (await fetchTable('ruchia_profile', {limit:1}))?.[0] || SAMPLE.profile;
+  const fallbackProfile = {
+    name_jp:'夕星るちあ', name_en:'Sekisei Ruchia', tagline:'', bio:'',
+    birthday:'-', height:'-', likes:'-', dislikes:'', image_url:''
+  };
+  const profile = (await fetchTable('ruchia_profile', {limit:1}))?.[0] || window.SAMPLE?.profile || fallbackProfile;
   renderProfile(profile);
 
-  const news = await fetchTable('ruchia_news', {order:{col:'date', asc:false}, limit:5}) || SAMPLE.news;
+  const news = await fetchTable('ruchia_news', {order:{col:'date', asc:false}, limit:5}) || window.SAMPLE?.news || [];
   renderNews(news);
 
-  scheduleData = await fetchTable('ruchia_schedule', {order:{col:'date', asc:true}}) || SAMPLE.schedule;
+  const scenarioContents = await fetchTable('ruchia_contents_scenario', {order:{col:'scenario_name', asc:true}}) || window.SAMPLE?.contents_scenario || [];
+  const gameContents = await fetchTable('ruchia_contents_game', {order:{col:'game_name', asc:true}}) || window.SAMPLE?.contents_game || [];
+  scenarioContentMap = buildContentMap(scenarioContents, 'scenario_name');
+  gameContentMap = buildContentMap(gameContents, 'game_name');
+
+  scheduleData = await fetchTable('ruchia_schedule', {order:{col:'date', asc:true}}) || window.SAMPLE?.schedule || [];
   renderCalendar();
   renderUpcoming(scheduleData);
 
-  const logs = await fetchTable('ruchia_scenario_logs', {order:{col:'date', asc:false}}) || SAMPLE.scenario;
-  renderLogs(logs);
+  renderScenarioRecords(buildScenarioRecords(scheduleData, scenarioContents));
 
   if(!hasSupabase){
     console.info('%c[夕星るちあ Portal] Supabase未接続のため、サンプルデータを表示しています。', 'color:#8fb3ee');
