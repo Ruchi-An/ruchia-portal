@@ -783,7 +783,6 @@ a:hover > .scenario-stream-thumb{ opacity:.85; border-color:var(--select-border)
           <div class="cal-legend-group">
             <span class="item"><svg width="12" height="12" style="color:var(--cat-game)"><use href="#ico-gamepad"/></svg>ゲーム</span>
             <span class="item"><svg width="12" height="12" style="color:var(--cat-scenario)"><use href="#ico-book-open"/></svg>シナリオ</span>
-            <span class="item"><svg width="12" height="12" style="color:var(--cat-real)"><use href="#ico-bird"/></svg>リアル</span>
           </div>
           <div class="cal-legend-title">時間帯</div>
           <div class="cal-legend-group">
@@ -1237,7 +1236,7 @@ function eventRowHtml(e, isPast){
     ${leftHtml}
     <div class="event-body">
       <div class="event-meta">
-        ${fmtDateYMDW(e.date)} ${e.time||''}
+        ${fmtDateYMDW(e.date||'日程未定')} ${e.time||''}
         ${categoryTagHtml}
         ${todChips}
         ${tableTypeHtml}
@@ -1256,11 +1255,36 @@ let schedulePages = { upcoming: 1, past: 1 };
 
 function renderUpcoming(list){
   const now = new Date(); now.setHours(0,0,0,0);
+  const toStartOfDay = (value) => {
+    if(!value) return null;
+    const d = new Date(value);
+    if(isNaN(d)) return null;
+    d.setHours(0,0,0,0);
+    return d;
+  };
 
-  scheduleLists.upcoming = (list||[]).filter(e=> new Date(e.date) >= now)
-    .sort((a,b)=> new Date(a.date)-new Date(b.date));
-  scheduleLists.past = (list||[]).filter(e=> new Date(e.date) < now)
-    .sort((a,b)=> new Date(b.date)-new Date(a.date));
+  scheduleLists.upcoming = (list||[]).filter(e=> {
+    const d = toStartOfDay(e.date);
+    return !d || d >= now;
+  }).sort((a,b)=> {
+    const da = toStartOfDay(a.date);
+    const db = toStartOfDay(b.date);
+    if(!da && !db) return 0;
+    if(!da) return 1;
+    if(!db) return -1;
+    return da - db;
+  });
+  scheduleLists.past = (list||[]).filter(e=> {
+    const d = toStartOfDay(e.date);
+    return !!d && d < now;
+  }).sort((a,b)=> {
+    const da = toStartOfDay(a.date);
+    const db = toStartOfDay(b.date);
+    if(!da && !db) return 0;
+    if(!da) return 1;
+    if(!db) return -1;
+    return db - da;
+  });
 
   schedulePages.upcoming = 1;
   schedulePages.past = 1;
