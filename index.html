@@ -340,13 +340,23 @@ h1,h2,h3{ font-family:var(--font-disp-jp); font-weight:700; margin:0; color:var(
 /* ==========================================================
    6. SCENARIO PAGE
 ========================================================== */
-.scenario-toolbar{ padding:10px 24px 4px; }
+.scenario-toolbar{ padding:10px 24px 4px; display:flex; gap:10px; }
 .scenario-toolbar input{
-  width:100%; padding:11px 16px; border-radius:999px; border:1px solid var(--line-soft);
+  flex:1; min-width:0; padding:11px 16px; border-radius:999px; border:1px solid var(--line-soft);
   background:rgba(255,255,255,.03); color:var(--moon-white); font-family:inherit; font-size:.85rem; outline:none;
 }
 .scenario-toolbar input:focus{ border-color:var(--select-border); box-shadow:0 0 0 3px var(--select-glow); }
 .scenario-toolbar input::placeholder{ color:var(--pale-blue); opacity:.6; }
+.scenario-toolbar select{
+  flex:0 0 auto; max-width:38%; padding:11px 14px; border-radius:999px; border:1px solid var(--line-soft);
+  background:rgba(255,255,255,.03); color:var(--moon-white); font-family:inherit; font-size:.82rem; outline:none;
+}
+.scenario-toolbar select:focus{ border-color:var(--select-border); box-shadow:0 0 0 3px var(--select-glow); }
+@media(max-width:900px){
+  .scenario-toolbar{ flex-wrap:wrap; }
+  .scenario-toolbar input{ flex:1 1 100%; }
+  .scenario-toolbar select{ flex:1 1 100%; max-width:100%; }
+}
 
 .scenario-tabs{ display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap; }
 .s-tab{
@@ -385,6 +395,29 @@ h1,h2,h3{ font-family:var(--font-disp-jp); font-weight:700; margin:0; color:var(
   font-size:.64rem; letter-spacing:.04em; padding:2px 8px; border-radius:999px;
   border:1px solid var(--line-strong); color:var(--star-blue); margin-left:6px; white-space:nowrap;
 }
+.scenario-tag-row{ display:flex; flex-wrap:wrap; gap:6px; margin:10px 0 4px; }
+.detail-tag{
+  font-size:.68rem; letter-spacing:.04em; padding:3px 11px; border-radius:999px;
+  border:1px solid var(--line-strong); color:var(--lemon-vivid); background:rgba(255,255,255,.02);
+  white-space:nowrap;
+}
+.detail-tag-count{ color:var(--star-blue); }
+.detail-tag-gm{
+  cursor:pointer; color:var(--moon-white); border-color:var(--select-border); transition:.2s;
+}
+.detail-tag-gm:hover{ background:var(--select-bg); }
+.tag-chip-row{ display:flex; flex-wrap:wrap; gap:6px; }
+.tag-chip-mini{
+  display:inline-flex; font-size:.66rem; letter-spacing:.03em; padding:2px 9px; border-radius:999px;
+  border:1px solid var(--line-strong); color:var(--pale-blue);
+}
+.official-iframe-wrap{
+  position:relative; width:100%; border-radius:10px; border:1px solid var(--line-strong); overflow:hidden;
+  background:rgba(255,255,255,.02);
+}
+.official-iframe-wrap iframe{ width:100%; height:360px; border:0; display:block; background:#fff; }
+.official-iframe-fallback{ margin-top:6px; font-size:.72rem; }
+.official-iframe-fallback a{ color:var(--lemon-vivid); }
 .person-link{
   display:inline-flex; align-items:center; gap:7px; padding:5px 14px 5px 6px; border-radius:999px;
   border:1px solid var(--line-strong); color:var(--pale-blue); text-decoration:none; font-size:.84rem;
@@ -440,6 +473,15 @@ a:hover > .scenario-stream-thumb{ opacity:.85; border-color:var(--select-border)
 .scenario-detail-grid{ display:grid; grid-template-columns:180px 1fr; gap:8px 14px; }
 .scenario-detail-grid .k{ color:var(--star-blue); font-size:.78rem; }
 .scenario-detail-grid .v{ color:var(--pale-blue); font-size:.84rem; line-height:1.8; white-space:pre-wrap; word-break:break-word; }
+
+.participants-table{ width:100%; border-collapse:collapse; font-size:.82rem; }
+.participants-table th, .participants-table td{
+  padding:6px 10px; text-align:left; border-bottom:1px solid var(--select-bg);
+}
+.participants-table th{ color:var(--star-blue); font-weight:500; font-size:.76rem; }
+.participants-table td{ color:var(--pale-blue); }
+.participants-table tr:last-child td{ border-bottom:none; }
+.participants-table td.seat-gm{ color:var(--moon-white); }
 .scenario-endcard{
   width:100%;
   max-width:360px;
@@ -447,15 +489,6 @@ a:hover > .scenario-stream-thumb{ opacity:.85; border-color:var(--select-border)
   border:1px solid var(--line-strong);
   display:block;
 }
-.scenario-trailer{
-  width:100%;
-  max-width:360px;
-  border-radius:10px;
-  border:1px solid var(--line-strong);
-  display:block;
-  transition:.2s;
-}
-a:hover > .scenario-trailer{ opacity:.85; border-color:var(--select-border); }
 @media(max-width:900px){
   .scenario-detail-grid{ grid-template-columns:1fr; gap:4px 0; }
 }
@@ -797,6 +830,9 @@ a:hover > .scenario-trailer{ opacity:.85; border-color:var(--select-border); }
         <svg class="card-corner tl" viewBox="0 0 100 100" style="color:var(--star-blue)"><use href="#art-orb"/></svg>
         <div class="scenario-toolbar">
           <input type="text" id="scenarioSearch" placeholder="シナリオ名・ジャンルで検索…">
+          <select id="scenarioGenreFilter">
+            <option value="">すべてのジャンル</option>
+          </select>
         </div>
         <div class="log-list-full" id="logList"><div class="loading-note">記録を読み込み中…</div></div>
         <div id="logPagination" class="pagination"></div>
@@ -974,7 +1010,13 @@ document.querySelectorAll('[data-nav]').forEach(el=>{
      stream_url text,       -- ゲーム・シナリオのみ
      img_thumbnail text,    -- ゲーム・シナリオのみ（Storage の画像URL）
      img_endcard text,      -- シナリオのみ（Storage の画像URL）
-     pc_ho_number text      -- シナリオのみ（担当PC/HOの番号。例: "PC3" "HO2"）
+     pc_ho_number text,     -- シナリオのみ（担当PC/HOの番号。例: "PC3" "HO2"）
+     pc_ho_name text,       -- シナリオのみ（担当PC/HOの名前。表示NGの場合は空でも可）
+     pc_ho_public boolean,  -- シナリオのみ（PC/HO名を公開するか。falseなら番号のみ表示）
+     participants jsonb,    -- シナリオのみ（卓全体の座席表。例:
+                            --   [{"seat":"GM","player_name":"GMさん"},
+                            --    {"seat":"PC1","content_name":"PCのaaa","player_name":"Bさん"}, ...]）
+     pc_ho_disclosure text  -- シナリオのみ（"PC/HO名公開OK" / "PC/HO順のみ公開OK" / "PC/HO公開NG"）
 
    ruchia_contents_scenario
      scenario_name text,
@@ -1294,6 +1336,34 @@ function boolJa(v){
   return '-';
 }
 
+/* 座席表：PCHO公開設定に応じて GM/PL列の表示を切り替える
+   - "PC/HO名公開OK"     : PC1 PCのaaa
+   - "PC/HO順のみ公開OK" : PC1
+   - それ以外(NG等)      : PL
+   GM行は常に "GM" 固定表示。 */
+function participantsTableHtml(participants, disclosure){
+  if(!Array.isArray(participants) || !participants.length) return '';
+  const rows = participants.map(p=>{
+    let seatLabel;
+    if(p.seat === 'GM'){
+      seatLabel = 'GM';
+    } else if(disclosure === '名前公開OK'){
+      seatLabel = p.content_name ? `${p.seat} ${p.content_name}` : (p.seat || 'PL');
+    } else if(disclosure === '順番のみ公開OK'){
+      seatLabel = p.seat || 'PL';
+    } else {
+      seatLabel = 'PL';
+    }
+    const seatCls = p.seat === 'GM' ? ' class="seat-gm"' : '';
+    return `<tr><td${seatCls}>${esc(seatLabel)}</td><td>${esc(p.player_name || '')}</td></tr>`;
+  }).join('');
+
+  return `<table class="participants-table">
+    <thead><tr><th>GM/PL</th><th>PL名</th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+}
+
 function personLinkChip(name, url, iconId){
   const label = esc(name);
   const safe = safeUrl(url);
@@ -1320,8 +1390,12 @@ function buildScenarioRecords(scheduleList, contentList){
         thumbnail_url: s.img_thumbnail || '',
         endcard_url: s.img_endcard || '',
         pc_ho: s.pc_ho_number || '',
+        pc_ho_name: s.pc_ho_name || '',
+        pc_ho_public: !!s.pc_ho_public,
+        participants: Array.isArray(s.participants) ? s.participants : [],
+        pc_ho_disclosure: s.pc_ho_disclosure || '',
         official_link: content?.official_link || '',
-        isFuture: date ? (new Date(date) >= now) : false,
+        isFuture: date ? (new Date(date) >= now) : true,
         passNumber: null,
         schedule: s,
         content
@@ -1332,12 +1406,31 @@ function buildScenarioRecords(scheduleList, contentList){
   const dated = records.filter(r=>r.date).sort((a,b)=> new Date(a.date)-new Date(b.date));
   dated.forEach((r,i)=>{ r.passNumber = i+1; });
 
+  /* ジャンルごとの通過数：ジャンルでグルーピングし、通過日の古い順に連番を振る */
+  const genreGroups = new Map();
+  dated.forEach(r=>{
+    const g = r.genre || '-';
+    if(!genreGroups.has(g)) genreGroups.set(g, []);
+    genreGroups.get(g).push(r);
+  });
+  genreGroups.forEach(arr=>{ arr.forEach((r,i)=>{ r.genrePassNumber = i+1; }); });
+
   return records;
 }
 
 function renderScenarioRecords(list){
   allScenarioRecords = list || [];
+  populateGenreFilter();
   applyScenarioFilter();
+}
+
+function populateGenreFilter(){
+  const sel = document.getElementById('scenarioGenreFilter');
+  if(!sel) return;
+  const prev = sel.value;
+  const genres = Array.from(new Set(allScenarioRecords.map(r=> r.genre || '-').filter(g=> g && g !== '-'))).sort((a,b)=> a.localeCompare(b, 'ja'));
+  sel.innerHTML = `<option value="">すべてのジャンル</option>` + genres.map(g=>`<option value="${esc(g)}">${esc(g)}</option>`).join('');
+  if(genres.includes(prev)) sel.value = prev;
 }
 
 function isWideScenario(){ return window.matchMedia('(min-width:901px)').matches; }
@@ -1346,7 +1439,9 @@ let scenarioTab = 'log';
 
 function applyScenarioFilter(){
   const q = (document.getElementById('scenarioSearch').value || '').trim().toLowerCase();
-  const source = allScenarioRecords.filter(r => scenarioTab === 'plan' ? r.isFuture : !r.isFuture);
+  const genreFilter = document.getElementById('scenarioGenreFilter')?.value || '';
+  let source = allScenarioRecords.filter(r => scenarioTab === 'plan' ? r.isFuture : !r.isFuture);
+  if(genreFilter) source = source.filter(r => (r.genre || '-') === genreFilter);
   const filtered = !q ? source.slice() : source.filter(r=>{
     return [r.scenario_name, r.genre].some(v => String(v || '').toLowerCase().includes(q));
   });
@@ -1380,13 +1475,15 @@ function renderLogListPage(){
   el.innerHTML = visible.map((log, i)=>{
     const idx = start + i;
     const dateLabel = log.date ? fmtDateYMDW(log.date) : '日程未定';
-    const numLabel = log.passNumber ? `No.${log.passNumber}` : '-';
+    const genreLabel = log.genre || '-';
+    const overallLabel = log.passNumber ? `全体 No.${log.passNumber}` : '全体 -';
+    const genreNumLabel = log.genrePassNumber ? `${esc(genreLabel)} No.${log.genrePassNumber}` : `${esc(genreLabel)} -`;
     const activeCls = idx===currentDetailIdx ? 'active' : '';
     const pcHoLabel = log.pc_ho ? `<span class="scenario-pcho">${esc(log.pc_ho)}</span>` : '';
     return `<div class="log-row ${activeCls}" data-idx="${idx}">
       <span class="lr-date">${dateLabel}</span>
-      <span class="lr-title">${esc(log.scenario_name)} <span class="scenario-genre">${esc(log.genre || '-')}</span>${pcHoLabel}</span>
-      <span class="lr-excerpt">通過数: ${numLabel}</span>
+      <span class="lr-title">${esc(log.scenario_name)}${pcHoLabel}</span>
+      <span class="lr-excerpt">${overallLabel} ／ ${genreNumLabel}</span>
     </div>`;
   }).join('');
   el.querySelectorAll('.log-row').forEach(row=>{
@@ -1404,58 +1501,93 @@ function renderLogListPage(){
   if(nextBtn) nextBtn.addEventListener('click', ()=>{ logPage++; renderLogListPage(); });
 }
 
+function tagChipsHtml(tags){
+  const arr = Array.isArray(tags) ? tags.filter(t=>String(t||'').trim()) : [];
+  if(!arr.length) return '-';
+  return `<span class="tag-chip-row">${arr.map(t=>`<span class="tag-chip-mini">${esc(t)}</span>`).join('')}</span>`;
+}
+
+/* タグ行に差し込む用：ラップ span なし、空なら '' */
+function tagChipsInline(tags){
+  const arr = Array.isArray(tags) ? tags.filter(t=>String(t||'').trim()) : [];
+  if(!arr.length) return '';
+  return arr.map(t=>`<span class="tag-chip-mini">${esc(t)}</span>`).join('');
+}
+
+/* TODO: シナリオマスター一覧画面を実装したら、該当シナリオへ遷移する処理に差し替える */
+function goToScenarioMaster(scenarioName){
+  console.log('[TODO] シナリオマスター一覧画面へ遷移予定:', scenarioName);
+}
+
 function bookHtml(log){
   const dateLabel = log.date ? fmtDateYMDW(log.date) : '日程未定';
   const c = log.content || {};
-  const tags = Array.isArray(c.tags) ? c.tags.join(', ') : '-';
   const endcard = safeUrl(log.endcard_url);
   const officialLink = safeUrl(c.official_link);
-  const trailerImg = safeUrl(c.trailer_image_url);
-  const numLabel = log.passNumber ? `No.${log.passNumber}` : '-';
+  const genreLabel = c.genre || log.genre || '-';
+  const numLabel = log.passNumber ? `全体 No.${log.passNumber}` : '全体 -';
+  const genreNumLabel = log.genrePassNumber ? `${esc(genreLabel)} No.${log.genrePassNumber}` : `${esc(genreLabel)} -`;
 
-  const detail = [
-    ['通過日', dateLabel],
-    ['通過数', numLabel],
-    ['シナリオ名', log.scenario_name || '-'],
-    ['ジャンル', c.genre || log.genre || '-'],
-    ['制作', c.production ? personLinkChip(c.production, c.production_link, 'ico-building') : '-'],
-    ['作者', c.author ? personLinkChip(c.author, c.author_link, 'ico-pen') : '-'],
-    ['GM有無', boolJa(c.has_gm)],
-    ['GM可否', boolJa(c.gm_available)],
-    ['GM回数', c.gm_count ?? '-'],
-    ['人数', c.player_count || '-'],
-    ['時間', c.duration || '-'],
-    ['タグ', esc(tags || '-')],
-    ['あらすじ', esc(c.synopsis || '-')],
-    ['概要', esc(c.overview || '-')]
+  /* タグ行：ジャンル／人数（PL）／GM可（該当時のみ、クリック可能）／タグ */
+  const genreTag = `<span class="detail-tag">${esc(genreLabel)}</span>`;
+  const countTag = c.player_count ? `<span class="detail-tag detail-tag-count">${esc(c.player_count)}PL</span>` : '';
+  const gmTag = c.gm_available
+    ? `<span class="detail-tag detail-tag-gm" role="button" tabindex="0" title="シナリオ詳細画面へ（準備中）" onclick="goToScenarioMaster('${esc(log.scenario_name)}')">GM可</span>`
+    : '';
+  const tagsTag = tagChipsInline(c.tags);
+  const tagRow = `<div class="scenario-tag-row">${genreTag}${countTag}${gmTag}${tagsTag}</div>`;
+
+  /* 座席表：participants があれば卓全体のGM/PL表を表示。
+     なければ旧データ互換で通過PC/HOの単一行にフォールバック。 */
+  const hasParticipants = Array.isArray(log.participants) && log.participants.length > 0;
+  const participantsBlock = hasParticipants
+    ? participantsTableHtml(log.participants, log.pc_ho_disclosure)
+    : '';
+
+  let pcHoValue = '-';
+  if(!hasParticipants && log.pc_ho){
+    pcHoValue = (log.pc_ho_public && log.pc_ho_name)
+      ? `${esc(log.pc_ho)}　${esc(log.pc_ho_name)}`
+      : esc(log.pc_ho);
+  }
+
+  /* 通過No／通過日／（旧データのみ）通過PC/HO */
+  const detailA = [
+    ['通過No', `${numLabel} ／ ${genreNumLabel}`],
+    ['通過日', esc(dateLabel)]
   ];
+  if(!hasParticipants) detailA.push(['通過PC/HO', pcHoValue]);
+  const detailAHtml = detailA.map(([k,v])=>`<span class="k">${k}</span><span class="v">${v}</span>`).join('');
 
-  const detailHtml = detail.map(([k,v])=>`<span class="k">${k}</span><span class="v">${v}</span>`).join('');
-
-  const officialBlock = trailerImg
-    ? `<div><div class="k" style="margin-bottom:6px; color:var(--star-blue); font-size:.78rem;">公式サイト</div><a href="${esc(officialLink || trailerImg)}" target="_blank" rel="noopener" title="公式サイトを開く"><img class="scenario-trailer" src="${esc(trailerImg)}" alt="${esc(log.scenario_name)} トレーラー"></a></div>`
-    : (officialLink
-        ? `<div><div class="k" style="margin-bottom:6px; color:var(--star-blue); font-size:.78rem;">公式サイト</div><div class="v"><a href="${esc(officialLink)}" target="_blank" rel="noopener">${esc(officialLink)}</a></div></div>`
-        : `<div><div class="k" style="margin-bottom:6px; color:var(--star-blue); font-size:.78rem;">公式サイト</div><div class="v">未設定</div></div>`);
-
+  /* エンドカード：画像のみ。なければ何も表示しない */
   const endcardBlock = endcard
-    ? `<div><div class="k" style="margin-bottom:6px; color:var(--star-blue); font-size:.78rem;">エンドカード</div><img class="scenario-endcard" src="${esc(endcard)}" alt="endcard"></div>`
-    : `<div><div class="k" style="margin-bottom:6px; color:var(--star-blue); font-size:.78rem;">エンドカード</div><div class="v">未設定</div></div>`;
+    ? `<img class="scenario-endcard" src="${esc(endcard)}" alt="endcard">`
+    : '';
 
+  /* 配信リンク：サムネイルがあれば画像のみ、なければURLテキストのみ */
   const streamUrlSafe = safeUrl(log.stream_url);
   const streamThumb = safeUrl(log.thumbnail_url);
   const streamBlock = streamUrlSafe
-    ? `<div><div class="k" style="margin-bottom:6px; color:var(--star-blue); font-size:.78rem;">配信URL</div><a href="${esc(streamUrlSafe)}" target="_blank" rel="noopener" title="配信を開く">${streamThumb ? `<img class="scenario-stream-thumb" src="${esc(streamThumb)}" alt="${esc(log.scenario_name)} 配信サムネイル">` : ''}<span class="v scenario-stream-url">${esc(streamUrlSafe)}</span></a></div>`
-    : `<div><div class="k" style="margin-bottom:6px; color:var(--star-blue); font-size:.78rem;">配信URL</div><div class="v">未設定</div></div>`;
+    ? `<div><a href="${esc(streamUrlSafe)}" target="_blank" rel="noopener" title="配信を開く" onclick="return confirm('配信を見ますか？');">${streamThumb ? `<img class="scenario-stream-thumb" src="${esc(streamThumb)}" alt="${esc(log.scenario_name)} 配信サムネイル">` : `<span class="v scenario-stream-url">${esc(streamUrlSafe)}</span>`}</a></div>`
+    : '';
+
+  /* 公式サイト／制作／作者：アイコン付きの丸チップ */
+  const detailB = [
+    ['公式サイト', officialLink ? personLinkChip('公式サイト', officialLink, 'ico-link') : '-'],
+    ['制作', c.production ? personLinkChip(c.production, c.production_link, 'ico-building') : '-'],
+    ['作者', c.author ? personLinkChip(c.author, c.author_link, 'ico-pen') : '-']
+  ];
+  const detailBHtml = detailB.map(([k,v])=>`<span class="k">${k}</span><span class="v">${v}</span>`).join('');
 
   return `
-    <span class="b-date">${dateLabel}</span>
+    ${tagRow}
     <h3>${esc(log.scenario_name)}</h3>
     <div class="scenario-detail-stack">
-      ${officialBlock}
-      ${streamBlock}
+      <div class="scenario-detail-grid">${detailAHtml}</div>
+      ${participantsBlock}
       ${endcardBlock}
-      <div class="scenario-detail-grid">${detailHtml}</div>
+      ${streamBlock}
+      <div class="scenario-detail-grid">${detailBHtml}</div>
     </div>`;
 }
 
@@ -1508,6 +1640,7 @@ document.querySelectorAll('#scenarioListTabs .s-tab').forEach(btn=>{
 });
 
 document.getElementById('scenarioSearch').addEventListener('input', applyScenarioFilter);
+document.getElementById('scenarioGenreFilter').addEventListener('change', applyScenarioFilter);
 document.getElementById('backToList').addEventListener('click', ()=> goTo('scenario'));
 document.getElementById('prevLog').addEventListener('click', ()=>{ if(currentDetailIdx>0) openDetailAt(currentDetailIdx-1); });
 document.getElementById('nextLog').addEventListener('click', ()=>{ if(currentDetailIdx<filteredScenarioRecords.length-1) openDetailAt(currentDetailIdx+1); });
