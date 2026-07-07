@@ -775,7 +775,7 @@ a:hover .scenario-stream-thumb{ opacity:.85; border-color:var(--select-border); 
         </div>
       </div>
       <div class="hero-copy">
-        <div class="eyebrow"><svg width="12" height="12"><use href="#ico-star"/></svg>星降る止まり木 ── 星々と物語がつながるポータルサイト</div>
+        <div class="eyebrow"><svg width="12" height="12"><use href="#ico-star"/></svg>星降る止まり木 ─ 星々と物語がつながるポータルサイト</div>
         <h1 id="heroName">夕星るちあ<span class="en-name" id="heroNameEn">SEKISEI RUCHIA</span></h1>
         <p class="tagline" id="heroTagline">光の欠片を集めながら、いろんな世界へ出会いに行く星旅の配信者。今日もどこかの星座の下で、あなたと物語を紡いでいます。</p>
 
@@ -1681,7 +1681,7 @@ function bookHtml(log){
   let pcHoValue = '-';
   if(!hasParticipants && log.pc_ho){
     pcHoValue = (log.pc_ho_public && log.pc_ho_name)
-      ? `${esc(log.pc_ho)}　${esc(log.pc_ho_name)}`
+      ? `${esc(log.pc_ho)}<span style="display:inline-block;width:.45em;"></span>${esc(log.pc_ho_name)}`
       : esc(log.pc_ho);
   }
 
