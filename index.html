@@ -49,6 +49,14 @@
   --font-disp-jp: "Shippori Mincho", serif;
   --font-disp-en: "Cinzel Decorative", serif;
   --font-body: "Noto Sans JP", sans-serif;
+  /* サムネイル／エンドカードに重ねるウォーターマーク画像（4色）。
+     index.html と同じ階層に assets フォルダを置き、以下の4ファイルを入れてください：
+     assets/wm-black.png / wm-darkgray.png / wm-lightgray.png / wm-white.png
+     画像の明るさに応じて、JS側（pickWatermarkTone）が自動で最も見やすい色を選びます。 */
+  --watermark-black:     url('assets/wm-black.png');
+  --watermark-darkgray:  url('assets/wm-darkgray.png');
+  --watermark-lightgray: url('assets/wm-lightgray.png');
+  --watermark-white:     url('assets/wm-white.png');
 }
 
 *{ box-sizing:border-box; }
@@ -202,13 +210,17 @@ h1,h2,h3{ font-family:var(--font-disp-jp); font-weight:700; margin:0; color:var(
 .magic-ring.rev{ animation-direction:reverse; animation-duration:120s; width:76%; height:76%; opacity:.4; }
 @keyframes spin{ from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
 .portrait-frame{
-  position:relative; z-index:2; width:82%; height:82%; border-radius:50%;
+  position:relative; z-index:2; width:82%; height:120%; border-radius:50%;
   border:1px solid var(--line-strong);
   background:linear-gradient(160deg, rgba(44,64,130,.72), rgba(20,28,72,.85));
-  display:flex; align-items:center; justify-content:center; overflow:hidden;
+  display:flex; align-items:center; justify-content:center; overflow:visible;
   box-shadow:0 0 60px rgba(143,179,238,.18), inset 0 0 40px rgba(0,0,0,.4);
 }
-.portrait-frame img{ width:100%; height:100%; object-fit:cover; }
+.portrait-frame img{
+  width:90%; height:90%; object-fit:cover;
+  border-radius:30%;
+  transform:scale(1.12);
+}
 .portrait-placeholder{ display:flex; flex-direction:column; align-items:center; gap:10px; color:var(--star-blue); text-align:center; padding:20px; }
 .portrait-placeholder svg{ width:56px; height:56px; opacity:.7; }
 .portrait-placeholder p{ font-size:.72rem; letter-spacing:.06em; color:var(--pale-blue); margin:0; line-height:1.6; }
@@ -350,8 +362,10 @@ h1,h2,h3{ font-family:var(--font-disp-jp); font-weight:700; margin:0; color:var(
 .scenario-toolbar select{
   flex:0 0 auto; max-width:38%; padding:11px 14px; border-radius:999px; border:1px solid var(--line-soft);
   background:rgba(255,255,255,.03); color:var(--moon-white); font-family:inherit; font-size:.82rem; outline:none;
+  color-scheme:dark;
 }
 .scenario-toolbar select:focus{ border-color:var(--select-border); box-shadow:0 0 0 3px var(--select-glow); }
+.scenario-toolbar select option{ background:var(--night-deep); color:var(--moon-white); }
 @media(max-width:900px){
   .scenario-toolbar{ flex-wrap:wrap; }
   .scenario-toolbar input{ flex:1 1 100%; }
@@ -402,6 +416,7 @@ h1,h2,h3{ font-family:var(--font-disp-jp); font-weight:700; margin:0; color:var(
   white-space:nowrap;
 }
 .detail-tag-count{ color:var(--star-blue); }
+.detail-tag-tabletype{ color:var(--pale-blue); }
 .detail-tag-gm{
   cursor:pointer; color:var(--moon-white); border-color:var(--select-border); transition:.2s;
 }
@@ -429,12 +444,33 @@ h1,h2,h3{ font-family:var(--font-disp-jp); font-weight:700; margin:0; color:var(
   background:rgba(255,255,255,.06); color:var(--lemon-vivid); flex-shrink:0;
 }
 .person-name{ color:var(--pale-blue); font-size:.84rem; }
+.scenario-stream-wrap{ display:block; }
 .scenario-stream-thumb{
   width:100%; max-width:360px; border-radius:10px; border:1px solid var(--line-strong);
   display:block; transition:.2s;
 }
-a:hover > .scenario-stream-thumb{ opacity:.85; border-color:var(--select-border); }
+a:hover .scenario-stream-thumb{ opacity:.85; border-color:var(--select-border); }
 .scenario-stream-url{ display:block; margin-top:6px; word-break:break-word; }
+
+/* ウォーターマーク付き画像フレーム：inline-block にすることで、
+   リンクのクリック判定を画像の実サイズだけに限定する（block-in-inline による横幅伸びを防止） */
+.wm-frame{ position:relative; display:inline-block; max-width:360px; width:100%; vertical-align:top; }
+.wm-frame > img, .wm-frame > canvas{ display:block; width:100%; height:auto; }
+.wm-frame > canvas{ -webkit-user-drag:none; }
+/* ::after は canvas 合成（保存時にも透かしが焼き込まれる方式）が失敗した場合の
+   フォールバック専用。通常時は非表示で、data-wm-fallback="1" のときだけ表示する
+   （この場合は表示上の重ね掛けのみで、保存ファイルには透かしが含まれない）。 */
+.wm-frame::after{
+  content:""; position:absolute; inset:0; border-radius:10px; pointer-events:none;
+  background-repeat:repeat; background-size:130px auto; opacity:0;
+  background-image:var(--watermark-darkgray);
+  transition:opacity .2s ease;
+}
+.wm-frame[data-wm-fallback="1"]::after{ opacity:.6; }
+.wm-frame[data-wm-fallback="1"][data-wm="black"]::after{     background-image:var(--watermark-black); }
+.wm-frame[data-wm-fallback="1"][data-wm="darkgray"]::after{  background-image:var(--watermark-darkgray); }
+.wm-frame[data-wm-fallback="1"][data-wm="lightgray"]::after{ background-image:var(--watermark-lightgray); }
+.wm-frame[data-wm-fallback="1"][data-wm="white"]::after{     background-image:var(--watermark-white); }
 .lr-meta{
   grid-column:2;
   display:flex;
@@ -538,7 +574,11 @@ a:hover > .scenario-stream-thumb{ opacity:.85; border-color:var(--select-border)
 ========================================================== */
 .profile-layout{ display:grid; grid-template-columns:0.7fr 1.3fr; gap:30px; }
 @media(max-width:900px){ .profile-layout{ grid-template-columns:1fr; } }
-.profile-portrait{ aspect-ratio:3/4; border-radius:var(--radius-lg); overflow:hidden; position:relative; }
+.profile-portrait{ aspect-ratio:3/4; border-radius:var(--radius-lg); overflow:visible; position:relative; }
+.profile-portrait > img{
+  transform:scale(1.08);
+  transform-origin:center;
+}
 .profile-info{ padding:30px 32px; }
 .profile-info .en-name{ font-family:var(--font-disp-en); color:var(--star-blue); font-size:.85rem; letter-spacing:.1em; margin-left:10px; }
 .profile-bio{ color:var(--pale-blue); line-height:2; margin-top:16px; font-size:.9rem; }
@@ -795,7 +835,8 @@ a:hover > .scenario-stream-thumb{ opacity:.85; border-color:var(--select-border)
       </div>
       <div class="upcoming-col">
         <div class="scenario-tabs" id="scheduleTabs">
-          <button class="s-tab active" data-schedule-tab="upcoming"><svg width="13" height="13"><use href="#ico-calendar"/></svg>UPCOMING<span class="jp-small">・これからの予定</span></button>
+          <button class="s-tab active" data-schedule-tab="month" id="monthScheduleTab"><svg width="13" height="13"><use href="#ico-calendar"/></svg><span class="jp-small" id="monthScheduleTabLabel">今月の予定</span></button>
+          <button class="s-tab" data-schedule-tab="upcoming"><svg width="13" height="13"><use href="#ico-calendar"/></svg>UPCOMING<span class="jp-small">・これからの予定</span></button>
           <button class="s-tab" data-schedule-tab="past"><svg width="13" height="13"><use href="#ico-calendar"/></svg>PAST<span class="jp-small">・過去の予定</span></button>
         </div>
         <div class="card upcoming-card">
@@ -804,6 +845,8 @@ a:hover > .scenario-stream-thumb{ opacity:.85; border-color:var(--select-border)
           <div id="upcomingPagination" class="pagination"></div>
           <div id="pastList" style="display:none"><div class="loading-note">過去の予定を読み込み中…</div></div>
           <div id="pastPagination" class="pagination" style="display:none"></div>
+          <div id="monthList" style="display:none"><div class="loading-note">この月の予定を読み込み中…</div></div>
+          <div id="monthPagination" class="pagination" style="display:none"></div>
         </div>
       </div>
     </div>
@@ -1250,8 +1293,49 @@ function eventRowHtml(e, isPast){
 
 /* ---------- schedule list pagination ---------- */
 const SCHEDULE_PAGE_SIZE = 20;
-let scheduleLists = { upcoming: [], past: [] };
-let schedulePages = { upcoming: 1, past: 1 };
+let scheduleLists = { upcoming: [], past: [], month: [] };
+let schedulePages = { upcoming: 1, past: 1, month: 1 };
+const SCHEDULE_TAB_ELS = {
+  upcoming: { list:'upcomingList', pag:'upcomingPagination' },
+  past:     { list:'pastList',     pag:'pastPagination' },
+  month:    { list:'monthList',    pag:'monthPagination' }
+};
+
+/* カレンダーが現在表示している年月の予定を、過去/未来を問わず1日から順に並べる */
+function computeMonthScheduleList(){
+  const y = currentMonth.getFullYear(), m = currentMonth.getMonth();
+  scheduleLists.month = (scheduleData||[]).filter(e=>{
+    if(!e.date) return false;
+    const d = new Date(e.date);
+    return !isNaN(d) && d.getFullYear()===y && d.getMonth()===m;
+  }).sort((a,b)=> new Date(a.date) - new Date(b.date));
+}
+
+function updateMonthScheduleTabLabel(){
+  const y = currentMonth.getFullYear(), m = currentMonth.getMonth()+1;
+  document.getElementById('monthScheduleTabLabel').textContent = `${y}年${m}月の予定`;
+}
+
+function activateScheduleTab(kind){
+  document.querySelectorAll('#scheduleTabs .s-tab').forEach(b=>{
+    b.classList.toggle('active', b.dataset.scheduleTab === kind);
+  });
+  Object.keys(SCHEDULE_TAB_ELS).forEach(k=>{
+    const show = k === kind;
+    document.getElementById(SCHEDULE_TAB_ELS[k].list).style.display = show ? '' : 'none';
+    document.getElementById(SCHEDULE_TAB_ELS[k].pag).style.display = show ? '' : 'none';
+  });
+}
+
+/* カレンダーの月移動（今月/前月/次月）に連動して、月別予定タブを更新してアクティブにする */
+function onCalendarMonthChange(){
+  renderCalendar();
+  computeMonthScheduleList();
+  schedulePages.month = 1;
+  updateMonthScheduleTabLabel();
+  renderScheduleTab('month');
+  activateScheduleTab('month');
+}
 
 function renderUpcoming(list){
   const now = new Date(); now.setHours(0,0,0,0);
@@ -1288,18 +1372,29 @@ function renderUpcoming(list){
 
   schedulePages.upcoming = 1;
   schedulePages.past = 1;
+  computeMonthScheduleList();
+  schedulePages.month = 1;
+  updateMonthScheduleTabLabel();
   renderScheduleTab('upcoming');
   renderScheduleTab('past');
+  renderScheduleTab('month');
 }
+
+const SCHEDULE_EMPTY_MSG = {
+  upcoming: '今後の予定はまだ登録されていません。',
+  past: '過去の予定はありません。',
+  month: 'この月の予定はまだ登録されていません。'
+};
 
 function renderScheduleTab(kind){
   const isPast = kind === 'past';
-  const listEl = document.getElementById(isPast ? 'pastList' : 'upcomingList');
-  const pagEl = document.getElementById(isPast ? 'pastPagination' : 'upcomingPagination');
+  const { list: listId, pag: pagId } = SCHEDULE_TAB_ELS[kind];
+  const listEl = document.getElementById(listId);
+  const pagEl = document.getElementById(pagId);
   const list = scheduleLists[kind];
 
   if(!list.length){
-    listEl.innerHTML = `<div class="empty-note">${isPast ? '過去の予定はありません。' : '今後の予定はまだ登録されていません。'}</div>`;
+    listEl.innerHTML = `<div class="empty-note">${SCHEDULE_EMPTY_MSG[kind]}</div>`;
     pagEl.innerHTML = '';
     return;
   }
@@ -1321,7 +1416,7 @@ function renderScheduleTab(kind){
 function changeSchedulePage(kind, page){
   schedulePages[kind] = page;
   renderScheduleTab(kind);
-  document.getElementById(kind==='past' ? 'pastList' : 'upcomingList').scrollIntoView({block:'nearest'});
+  document.getElementById(SCHEDULE_TAB_ELS[kind].list).scrollIntoView({block:'nearest'});
 }
 
 /* ---------- scenario: PL records from schedule + content master ---------- */
@@ -1409,6 +1504,7 @@ function buildScenarioRecords(scheduleList, contentList){
         date,
         scenario_name: content?.scenario_name || s.contents || '-',
         genre: content?.genre || '-',
+        table_type: s.table_type || '',
         role: s.role || '-',
         stream_url: s.stream_url || '',
         thumbnail_url: s.img_thumbnail || '',
@@ -1552,14 +1648,15 @@ function bookHtml(log){
   const numLabel = log.passNumber ? `全体 No.${log.passNumber}` : '全体 -';
   const genreNumLabel = log.genrePassNumber ? `${esc(genreLabel)} No.${log.genrePassNumber}` : `${esc(genreLabel)} -`;
 
-  /* タグ行：ジャンル／人数（PL）／GM可（該当時のみ、クリック可能）／タグ */
+  /* タグ行の表示順：ジャンル／卓種別／人数（PL）／タグ／GM可（該当時のみ、クリック可能） */
   const genreTag = `<span class="detail-tag">${esc(genreLabel)}</span>`;
+  const tableTypeTag = log.table_type ? `<span class="detail-tag detail-tag-tabletype">${esc(log.table_type)}</span>` : '';
   const countTag = c.player_count ? `<span class="detail-tag detail-tag-count">${esc(c.player_count)}PL</span>` : '';
   const gmTag = c.gm_available
     ? `<span class="detail-tag detail-tag-gm" role="button" tabindex="0" title="シナリオ詳細画面へ（準備中）" onclick="goToScenarioMaster('${esc(log.scenario_name)}')">GM可</span>`
     : '';
   const tagsTag = tagChipsInline(c.tags);
-  const tagRow = `<div class="scenario-tag-row">${genreTag}${countTag}${gmTag}${tagsTag}</div>`;
+  const tagRow = `<div class="scenario-tag-row">${genreTag}${tableTypeTag}${countTag}${tagsTag}${gmTag}</div>`;
 
   /* 座席表：participants があれば卓全体のGM/PL表を表示。
      なければ旧データ互換で通過PC/HOの単一行にフォールバック。 */
@@ -1585,14 +1682,14 @@ function bookHtml(log){
 
   /* エンドカード：画像のみ。なければ何も表示しない */
   const endcardBlock = endcard
-    ? `<img class="scenario-endcard" src="${esc(endcard)}" alt="endcard">`
+    ? `<span class="wm-frame"><img class="scenario-endcard" src="${esc(endcard)}" alt="endcard"></span>`
     : '';
 
-  /* 配信リンク：サムネイルがあれば画像のみ、なければURLテキストのみ */
+  /* 配信リンク：サムネイルがあれば画像のみ（クリック判定は画像サイズに限定）、なければURLテキストのみ */
   const streamUrlSafe = safeUrl(log.stream_url);
   const streamThumb = safeUrl(log.thumbnail_url);
   const streamBlock = streamUrlSafe
-    ? `<div><a href="${esc(streamUrlSafe)}" target="_blank" rel="noopener" title="配信を開く" onclick="return confirm('配信を見ますか？');">${streamThumb ? `<img class="scenario-stream-thumb" src="${esc(streamThumb)}" alt="${esc(log.scenario_name)} 配信サムネイル">` : `<span class="v scenario-stream-url">${esc(streamUrlSafe)}</span>`}</a></div>`
+    ? `<div class="scenario-stream-wrap"><a href="${esc(streamUrlSafe)}" target="_blank" rel="noopener" title="配信を開く" onclick="return confirm('配信を見ますか？');">${streamThumb ? `<span class="wm-frame"><img class="scenario-stream-thumb" src="${esc(streamThumb)}" alt="${esc(log.scenario_name)} 配信サムネイル"></span>` : `<span class="v scenario-stream-url">${esc(streamUrlSafe)}</span>`}</a></div>`
     : '';
 
   /* 公式サイト／制作／作者：アイコン付きの丸チップ */
@@ -1620,6 +1717,106 @@ function updateDetailNavState(){
   document.getElementById('nextLog').disabled = currentDetailIdx < 0 || currentDetailIdx >= filteredScenarioRecords.length-1;
 }
 
+/* ウォーターマークの自動色選択：
+   サムネイル／エンドカード画像の明るさを解析し、最も視認しやすい色（黒/濃灰/淡灰/白）を選ぶ。 */
+function pickWatermarkTone(avgLuminance){
+  if(avgLuminance >= 190) return 'black';
+  if(avgLuminance >= 130) return 'darkgray';
+  if(avgLuminance >= 70)  return 'lightgray';
+  return 'white';
+}
+
+const WATERMARK_ASSET = {
+  black:     'assets/wm-black.png',
+  darkgray:  'assets/wm-darkgray.png',
+  lightgray: 'assets/wm-lightgray.png',
+  white:     'assets/wm-white.png'
+};
+
+function loadImageEl(src){
+  return new Promise((resolve, reject)=>{
+    const im = new Image();
+    im.crossOrigin = 'anonymous';
+    im.onload = ()=> resolve(im);
+    im.onerror = ()=> reject(new Error('image load failed: ' + src));
+    im.src = src;
+  });
+}
+
+/* サムネイル／エンドカード画像を <canvas> に描き、その上にウォーターマークを重ねて
+   1枚のビットマップとして合成する。
+   ブラウザの「名前を付けて画像を保存」は canvas に今見えている内容をそのまま保存するため、
+   画面表示だけでなく、保存されたファイル自体にもウォーターマークが焼き込まれる
+   （プライバシー保護目的：無断転載された場合も透かしが残る）。
+   ※ Supabase Storage 側が画像取得時に CORS を許可していない場合は、
+     ブラウザの制約で canvas 合成ができず、従来通りの「表示専用オーバーレイ」に自動フォールバックする
+     （その場合は見た目だけ透かしが乗り、保存ファイルには含まれない点に注意）。 */
+async function bakeWatermarkedCanvas(frame, imgEl, src){
+  const probe = await loadImageEl(src);
+
+  const canvas = document.createElement('canvas');
+  canvas.width = probe.naturalWidth || 360;
+  canvas.height = probe.naturalHeight || 240;
+  canvas.className = imgEl.className;
+  if(imgEl.alt) canvas.setAttribute('aria-label', imgEl.alt);
+  canvas.draggable = false;
+
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(probe, 0, 0, canvas.width, canvas.height);
+
+  /* 明るさ解析 → 見やすい色のウォーターマークを選択 */
+  let tone = 'darkgray';
+  try{
+    const sw = 24, sh = 24;
+    const sCanvas = document.createElement('canvas');
+    sCanvas.width = sw; sCanvas.height = sh;
+    const sctx = sCanvas.getContext('2d');
+    sctx.drawImage(probe, 0, 0, sw, sh);
+    const data = sctx.getImageData(0, 0, sw, sh).data;
+    let total = 0, count = 0;
+    for(let i=0; i<data.length; i+=4){
+      if(data[i+3] < 10) continue; /* 透過部分は除外 */
+      total += 0.299*data[i] + 0.587*data[i+1] + 0.114*data[i+2];
+      count++;
+    }
+    if(count) tone = pickWatermarkTone(total / count);
+  }catch(err){
+    /* CORS制限等で明るさ解析ができない場合は既定色（濃灰）のまま続行 */
+  }
+
+  const wmImg = await loadImageEl(WATERMARK_ASSET[tone]);
+  const scale = canvas.width / 360; /* CSS側の基準サイズ(360px)に対する拡大率に合わせてタイルを拡大 */
+  const tileW = Math.max(40, 130 * scale);
+  const tileH = tileW * (wmImg.naturalHeight / wmImg.naturalWidth);
+  const tileCanvas = document.createElement('canvas');
+  tileCanvas.width = tileW;
+  tileCanvas.height = tileH;
+  tileCanvas.getContext('2d').drawImage(wmImg, 0, 0, tileW, tileH);
+
+  ctx.save();
+  ctx.globalAlpha = 0.6;
+  ctx.fillStyle = ctx.createPattern(tileCanvas, 'repeat');
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.restore();
+
+  frame.dataset.wmFallback = '0';
+  imgEl.replaceWith(canvas);
+}
+
+function initWatermarks(root){
+  (root || document).querySelectorAll('.wm-frame > img').forEach(img=>{
+    const frame = img.parentElement;
+    if(!frame || frame.dataset.wmSrc === img.src) return;
+    const src = img.src;
+    frame.dataset.wmSrc = src;
+    frame.dataset.wm = 'darkgray';
+    bakeWatermarkedCanvas(frame, img, src).catch(()=>{
+      /* canvas合成に失敗した場合のみ、従来の表示専用オーバーレイにフォールバック */
+      frame.dataset.wmFallback = '1';
+    });
+  });
+}
+
 function openDetailAt(idx){
   const log = filteredScenarioRecords[idx];
   if(!log) return;
@@ -1628,6 +1825,8 @@ function openDetailAt(idx){
   const html = bookHtml(log);
   document.getElementById('bookPage').innerHTML = html;
   document.getElementById('bookPagePanel').innerHTML = html;
+  initWatermarks(document.getElementById('bookPage'));
+  initWatermarks(document.getElementById('bookPagePanel'));
   updateDetailNavState();
   renderLogListPage();
 }
@@ -1643,15 +1842,7 @@ function onLogRowClick(idx){
 }
 
 document.querySelectorAll('#scheduleTabs .s-tab').forEach(btn=>{
-  btn.addEventListener('click', ()=>{
-    document.querySelectorAll('#scheduleTabs .s-tab').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    const isUpcoming = btn.dataset.scheduleTab === 'upcoming';
-    document.getElementById('upcomingList').style.display = isUpcoming ? '' : 'none';
-    document.getElementById('upcomingPagination').style.display = isUpcoming ? '' : 'none';
-    document.getElementById('pastList').style.display = isUpcoming ? 'none' : '';
-    document.getElementById('pastPagination').style.display = isUpcoming ? 'none' : '';
-  });
+  btn.addEventListener('click', ()=> activateScheduleTab(btn.dataset.scheduleTab));
 });
 
 document.querySelectorAll('#scenarioListTabs .s-tab').forEach(btn=>{
@@ -1704,6 +1895,7 @@ async function init(){
 
   scheduleData = await fetchTable('ruchia_schedule', {order:{col:'date', asc:true}}) || window.SAMPLE?.schedule || [];
   renderCalendar();
+  updateMonthScheduleTabLabel();
   renderUpcoming(scheduleData);
 
   renderScenarioRecords(buildScenarioRecords(scheduleData, scenarioContents));
@@ -1712,9 +1904,9 @@ async function init(){
     console.info('%c[夕星るちあ Portal] Supabase未接続のため、サンプルデータを表示しています。', 'color:#8fb3ee');
   }
 }
-document.getElementById('calToday').addEventListener('click', ()=>{ currentMonth = new Date(); renderCalendar(); });
-document.getElementById('calPrev').addEventListener('click', ()=>{ currentMonth.setMonth(currentMonth.getMonth()-1); renderCalendar(); });
-document.getElementById('calNext').addEventListener('click', ()=>{ currentMonth.setMonth(currentMonth.getMonth()+1); renderCalendar(); });
+document.getElementById('calToday').addEventListener('click', ()=>{ currentMonth = new Date(); onCalendarMonthChange(); });
+document.getElementById('calPrev').addEventListener('click', ()=>{ currentMonth.setMonth(currentMonth.getMonth()-1); onCalendarMonthChange(); });
+document.getElementById('calNext').addEventListener('click', ()=>{ currentMonth.setMonth(currentMonth.getMonth()+1); onCalendarMonthChange(); });
 
 init();
 </script>
