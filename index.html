@@ -866,7 +866,7 @@ a:hover .scenario-stream-thumb{ opacity:.85; border-color:var(--select-border); 
 
   <section class="page" id="page-image"></section>
     <div id="imageModal" class="image-modal" onclick="closeImage()">
-      <span class="wm-frame" id="modalImageFrame"><img id="modalImage" src="" alt=""></span>
+      <span class="wm-frame" id="modalImageFrame"><img id="modalImage" src="" alt="" crossorigin="anonymous"></span>
     </div>
   </section>
 
@@ -1259,7 +1259,7 @@ function eventRowHtml(e, isPast){
   const hasThumb = !!e.img_thumbnail;
   const leftHtml = hasThumb
     ? `<div class="event-thumb">
-        <span class="wm-frame" style="cursor:zoom-in;" onclick="openImage('${esc(e.img_thumbnail)}')"><img src="${esc(e.img_thumbnail)}" alt=""></span>
+        <span class="wm-frame" style="cursor:zoom-in;" onclick="openImage('${esc(e.img_thumbnail)}')"><img src="${esc(e.img_thumbnail)}" alt="" crossorigin="anonymous"></span>
       </div>`
     : `<div class="event-icon" style="border-color:${color}"><svg style="color:${color}"><use href="#ico-star"/></svg></div>`;
 
@@ -1695,7 +1695,7 @@ function bookHtml(log){
 
   /* エンドカード：画像のみ。なければ何も表示しない */
   const endcardBlock = endcard
-    ? `<span class="wm-frame"><img class="scenario-endcard" src="${esc(endcard)}" alt="endcard"></span>`
+    ? `<span class="wm-frame"><img class="scenario-endcard" src="${esc(endcard)}" alt="endcard" crossorigin="anonymous"></span>`
     : '';
 
   /* 配信リンク：table_type="配信卓" のときのみ表示。
@@ -1704,7 +1704,7 @@ function bookHtml(log){
   const streamUrlSafe = canShowStream ? safeUrl(log.stream_url) : '';
   const streamThumb = safeUrl(log.thumbnail_url);
   const streamBlock = streamUrlSafe
-    ? `<div class="scenario-stream-wrap"><a href="${esc(streamUrlSafe)}" target="_blank" rel="noopener" title="配信を開く" onclick="return confirm('配信を見ますか？');">${streamThumb ? `<span class="wm-frame"><img class="scenario-stream-thumb" src="${esc(streamThumb)}" alt="${esc(log.scenario_name)} 配信サムネイル"></span>` : `<span class="v scenario-stream-url">${esc(streamUrlSafe)}</span>`}</a></div>`
+    ? `<div class="scenario-stream-wrap"><a href="${esc(streamUrlSafe)}" target="_blank" rel="noopener" title="配信を開く" onclick="return confirm('配信を見ますか？');">${streamThumb ? `<span class="wm-frame"><img class="scenario-stream-thumb" src="${esc(streamThumb)}" alt="${esc(log.scenario_name)} 配信サムネイル" crossorigin="anonymous"></span>` : `<span class="v scenario-stream-url">${esc(streamUrlSafe)}</span>`}</a></div>`
     : '';
 
   /* 公式サイト／制作／作者：アイコン付きの丸チップ */
@@ -1825,8 +1825,9 @@ function initWatermarks(root){
     const src = img.src;
     frame.dataset.wmSrc = src;
     frame.dataset.wm = 'darkgray';
-    bakeWatermarkedCanvas(frame, img, src).catch(()=>{
+    bakeWatermarkedCanvas(frame, img, src).catch(err=>{
       /* canvas合成に失敗した場合のみ、従来の表示専用オーバーレイにフォールバック */
+      console.warn('[watermark] bake failed, falling back to overlay:', src, err);
       frame.dataset.wmFallback = '1';
     });
   });
@@ -1885,11 +1886,12 @@ function openImage(src){
   frame.dataset.wmFallback = '0';
   frame.dataset.wm = 'darkgray';
   delete frame.dataset.wmSrc;
-  frame.innerHTML = `<img id="modalImage" src="${esc(src)}" alt="">`;
+  frame.innerHTML = `<img id="modalImage" src="${esc(src)}" alt="" crossorigin="anonymous">`;
   document.getElementById("imageModal").classList.add("show");
   const img = document.getElementById('modalImage');
-  bakeWatermarkedCanvas(frame, img, src).catch(()=>{
+  bakeWatermarkedCanvas(frame, img, src).catch(err=>{
     /* canvas合成に失敗した場合のみ、従来の表示専用オーバーレイにフォールバック */
+    console.warn('[watermark] bake failed, falling back to overlay:', src, err);
     frame.dataset.wmFallback = '1';
   });
 }
