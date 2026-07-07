@@ -465,7 +465,7 @@ a:hover .scenario-stream-thumb{ opacity:.85; border-color:var(--select-border); 
   background-image:var(--watermark-darkgray);
   transition:opacity .2s ease;
 }
-.wm-frame[data-wm-fallback="1"]::after{ opacity:.6; }
+.wm-frame[data-wm-fallback="1"]::after{ opacity:.4; }
 .wm-frame[data-wm-fallback="1"][data-wm="black"]::after{     background-image:var(--watermark-black); }
 .wm-frame[data-wm-fallback="1"][data-wm="darkgray"]::after{  background-image:var(--watermark-darkgray); }
 .wm-frame[data-wm-fallback="1"][data-wm="lightgray"]::after{ background-image:var(--watermark-lightgray); }
@@ -1809,7 +1809,7 @@ async function bakeWatermarkedCanvas(frame, imgEl, src){
   tileCanvas.getContext('2d').drawImage(wmImg, 0, 0, tileW, tileH);
 
   ctx.save();
-  ctx.globalAlpha = 0.6;
+  ctx.globalAlpha = 0.4;
   ctx.fillStyle = ctx.createPattern(tileCanvas, 'repeat');
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   ctx.restore();
