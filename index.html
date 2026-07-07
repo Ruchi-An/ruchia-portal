@@ -1702,7 +1702,7 @@ function bookHtml(log){
 
   /* エンドカード：画像のみ。なければ何も表示しない */
   const endcardBlock = endcard
-    ? `<span class="wm-frame"><img class="scenario-endcard" src="${esc(endcard)}" alt="endcard" crossorigin="anonymous"></span>`
+    ? `<span class="wm-frame" style="cursor:zoom-in;" onclick="openImage('${esc(endcard)}')"><img class="scenario-endcard" src="${esc(endcard)}" alt="endcard" crossorigin="anonymous"></span>`
     : '';
 
   /* 配信リンク：table_type="配信卓" のときのみ表示。
