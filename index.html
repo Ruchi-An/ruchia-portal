@@ -1477,17 +1477,24 @@ function participantsTableHtml(participants, disclosure){
   if(!Array.isArray(participants) || !participants.length) return '';
   const rows = participants.map(p=>{
     let seatLabel;
+    let seatLabelHtml;
     if(p.seat === 'GM'){
       seatLabel = 'GM';
+      seatLabelHtml = esc(seatLabel);
     } else if(disclosure === '名前公開OK'){
-      seatLabel = p.content_name ? `${p.seat} ${p.content_name}` : (p.seat || 'PL');
+      seatLabel = p.seat || 'PL';
+      seatLabelHtml = p.content_name
+        ? `${esc(seatLabel)}<span aria-hidden="true" style="display:inline-block;width:.45em;"></span>${esc(p.content_name)}`
+        : esc(seatLabel);
     } else if(disclosure === '順番のみ公開OK'){
       seatLabel = p.seat || 'PL';
+      seatLabelHtml = esc(seatLabel);
     } else {
       seatLabel = 'PL';
+      seatLabelHtml = esc(seatLabel);
     }
     const seatCls = p.seat === 'GM' ? ' class="seat-gm"' : '';
-    return `<tr><td${seatCls}>${esc(seatLabel)}</td><td>${esc(p.player_name || '')}</td></tr>`;
+    return `<tr><td${seatCls}>${seatLabelHtml}</td><td>${esc(p.player_name || '')}</td></tr>`;
   }).join('');
 
   return `<table class="participants-table">
@@ -1681,7 +1688,7 @@ function bookHtml(log){
   let pcHoValue = '-';
   if(!hasParticipants && log.pc_ho){
     pcHoValue = (log.pc_ho_public && log.pc_ho_name)
-      ? `${esc(log.pc_ho)}<span style="display:inline-block;width:.45em;"></span>${esc(log.pc_ho_name)}`
+      ? `${esc(log.pc_ho)}　${esc(log.pc_ho_name)}`
       : esc(log.pc_ho);
   }
 
