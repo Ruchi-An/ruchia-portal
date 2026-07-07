@@ -320,7 +320,6 @@ h1,h2,h3{ font-family:var(--font-disp-jp); font-weight:700; margin:0; color:var(
 .event-right{ display:flex; flex-direction:column; align-items:center; gap:8px; flex-shrink:0; }
 .image-modal{position:fixed; inset:0; background:rgba(0,0,0,.8); display:none; justify-content:center; align-items:center; z-index:9999; }
 .image-modal.show{ display:flex;}
-.image-modal img{ max-width:90%; max-height:90%; border-radius:12px; box-shadow:0 0 30px rgba(0,0,0,.5); cursor:zoom-out;}
 
 .event-contents{ font-size:.75rem; color:var(--pale-blue); margin-top:5px; line-height:1.7; }
 .event-badge{ display:inline-flex; align-items:center; padding:1px 8px; border-radius:999px; font-size:.62rem; border:1px solid var(--line-strong); color:var(--star-blue); }
@@ -471,6 +470,19 @@ a:hover .scenario-stream-thumb{ opacity:.85; border-color:var(--select-border); 
 .wm-frame[data-wm-fallback="1"][data-wm="darkgray"]::after{  background-image:var(--watermark-darkgray); }
 .wm-frame[data-wm-fallback="1"][data-wm="lightgray"]::after{ background-image:var(--watermark-lightgray); }
 .wm-frame[data-wm-fallback="1"][data-wm="white"]::after{     background-image:var(--watermark-white); }
+
+/* SCHEDULE の小サムネイル（event-thumb）内でも wm-frame を使うため、
+   img と同じ表示（object-fit:cover）を canvas 合成後にも維持する */
+.event-thumb .wm-frame{ display:block; width:100%; height:100%; max-width:none; }
+.event-thumb .wm-frame > img, .event-thumb .wm-frame > canvas{ width:100%; height:100%; object-fit:cover; }
+.event-thumb .wm-frame::after{ border-radius:0; }
+
+/* 画像モーダル（拡大表示）内の wm-frame：元の img 単体表示時のサイズ・見た目を維持する */
+#modalImageFrame.wm-frame{ max-width:90%; max-height:90%; width:auto; display:inline-block; }
+#modalImageFrame.wm-frame > img, #modalImageFrame.wm-frame > canvas{
+  width:auto; height:auto; max-width:90vw; max-height:90vh;
+  border-radius:12px; box-shadow:0 0 30px rgba(0,0,0,.5); cursor:zoom-out; display:block;
+}
 .lr-meta{
   grid-column:2;
   display:flex;
@@ -854,7 +866,7 @@ a:hover .scenario-stream-thumb{ opacity:.85; border-color:var(--select-border); 
 
   <section class="page" id="page-image"></section>
     <div id="imageModal" class="image-modal" onclick="closeImage()">
-      <img id="modalImage" src="" alt="">
+      <span class="wm-frame" id="modalImageFrame"><img id="modalImage" src="" alt=""></span>
     </div>
   </section>
 
@@ -1247,7 +1259,7 @@ function eventRowHtml(e, isPast){
   const hasThumb = !!e.img_thumbnail;
   const leftHtml = hasThumb
     ? `<div class="event-thumb">
-        <img src="${e.img_thumbnail}" alt="" onclick="openImage('${e.img_thumbnail}')">
+        <span class="wm-frame" style="cursor:zoom-in;" onclick="openImage('${esc(e.img_thumbnail)}')"><img src="${esc(e.img_thumbnail)}" alt=""></span>
       </div>`
     : `<div class="event-icon" style="border-color:${color}"><svg style="color:${color}"><use href="#ico-star"/></svg></div>`;
 
@@ -1406,6 +1418,7 @@ function renderScheduleTab(kind){
   const pageItems = list.slice(start, start+SCHEDULE_PAGE_SIZE);
 
   listEl.innerHTML = pageItems.map(e=>eventRowHtml(e,isPast)).join('');
+  initWatermarks(listEl);
   pagEl.innerHTML = totalPages > 1
     ? `<button class="page-btn" ${page<=1?'disabled':''} onclick="changeSchedulePage('${kind}',${page-1})">‹ 前へ</button>
        <span class="page-info">${page} / ${totalPages}</span>
@@ -1685,8 +1698,10 @@ function bookHtml(log){
     ? `<span class="wm-frame"><img class="scenario-endcard" src="${esc(endcard)}" alt="endcard"></span>`
     : '';
 
-  /* 配信リンク：サムネイルがあれば画像のみ（クリック判定は画像サイズに限定）、なければURLテキストのみ */
-  const streamUrlSafe = safeUrl(log.stream_url);
+  /* 配信リンク：table_type="配信卓" のときのみ表示。
+     サムネイルがあれば画像のみ（クリック判定は画像サイズに限定）、なければURLテキストのみ */
+  const canShowStream = log.table_type === '配信卓';
+  const streamUrlSafe = canShowStream ? safeUrl(log.stream_url) : '';
   const streamThumb = safeUrl(log.thumbnail_url);
   const streamBlock = streamUrlSafe
     ? `<div class="scenario-stream-wrap"><a href="${esc(streamUrlSafe)}" target="_blank" rel="noopener" title="配信を開く" onclick="return confirm('配信を見ますか？');">${streamThumb ? `<span class="wm-frame"><img class="scenario-stream-thumb" src="${esc(streamThumb)}" alt="${esc(log.scenario_name)} 配信サムネイル"></span>` : `<span class="v scenario-stream-url">${esc(streamUrlSafe)}</span>`}</a></div>`
@@ -1866,8 +1881,17 @@ window.addEventListener('resize', ()=>{
 });
 
 function openImage(src){
-  document.getElementById("modalImage").src = src;
+  const frame = document.getElementById('modalImageFrame');
+  frame.dataset.wmFallback = '0';
+  frame.dataset.wm = 'darkgray';
+  delete frame.dataset.wmSrc;
+  frame.innerHTML = `<img id="modalImage" src="${esc(src)}" alt="">`;
   document.getElementById("imageModal").classList.add("show");
+  const img = document.getElementById('modalImage');
+  bakeWatermarkedCanvas(frame, img, src).catch(()=>{
+    /* canvas合成に失敗した場合のみ、従来の表示専用オーバーレイにフォールバック */
+    frame.dataset.wmFallback = '1';
+  });
 }
 
 function closeImage(){
