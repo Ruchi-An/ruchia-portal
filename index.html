@@ -1118,7 +1118,7 @@ document.querySelectorAll('[data-nav]').forEach(el=>{
      schedule_title text,
      contents text,         -- ゲーム・シナリオのみ
      contents_url text,     -- コンテンツURL（ico-gamepadリンク先）
-     table_type text,       -- シナリオのみ
+     table_type text,       -- ゲーム・シナリオのみ
      stream_type text,      -- ゲーム・シナリオのみ
      stream_url text,       -- ゲーム・シナリオのみ
      img_thumbnail text,    -- ゲーム・シナリオのみ（Storage の画像URL）
@@ -1323,7 +1323,7 @@ function eventRowHtml(e, isPast){
     : `<div class="event-icon" style="border-color:${color}"><svg style="color:${color}"><use href="#ico-star"/></svg></div>`;
 
   const contentsHtml = (showExtra && e.contents) ? `<div class="event-contents">${e.contents}</div>` : '';
-  const tableTypeHtml = (e.note_type==='シナリオ' && e.table_type) ? `<span class="event-badge">${e.table_type}</span>` : '';
+  const tableTypeHtml = ((e.note_type==='シナリオ' || e.note_type==='ゲーム') && e.table_type) ? `<span class="event-badge">${e.table_type}</span>` : '';
   const categoryTagHtml = e.note_type
     ? `<span class="event-tag" style="color:${color}; border-color:${color}"><i class="sw" style="background:${color}"></i> ${e.note_type}</span>`
     : '';
