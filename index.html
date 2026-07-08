@@ -548,8 +548,15 @@ a:hover .scenario-stream-thumb{ opacity:.85; border-color:var(--select-border); 
   font-size:.86rem; color:var(--pale-blue); line-height:1.9; white-space:pre-wrap; word-break:break-word;
   background:rgba(255,255,255,.02); border:1px solid var(--line-soft); border-radius:10px; padding:12px 14px;
 }
-.gm-history-wrap{ width:100%; overflow-x:auto; border-radius:10px; border:1px solid var(--line-soft); }
-.gm-history-table{ width:100%; border-collapse:collapse; font-size:.8rem; white-space:nowrap; }
+.gm-history-wrap{
+  width:100%; max-width:100%; overflow-x:auto; border-radius:10px; border:1px solid var(--line-soft);
+  scrollbar-width:thin; scrollbar-color:var(--line-strong) transparent;
+}
+.gm-history-wrap::-webkit-scrollbar{ height:8px; }
+.gm-history-wrap::-webkit-scrollbar-track{ background:rgba(255,255,255,.03); }
+.gm-history-wrap::-webkit-scrollbar-thumb{ background:var(--line-strong); border-radius:4px; }
+.gm-history-wrap::-webkit-scrollbar-thumb:hover{ background:var(--star-blue); }
+.gm-history-table{ width:max-content; min-width:100%; border-collapse:collapse; font-size:.8rem; white-space:nowrap; }
 .gm-history-table th, .gm-history-table td{
   padding:8px 12px; text-align:left; border-bottom:1px solid var(--select-bg); vertical-align:middle;
 }
@@ -1892,7 +1899,8 @@ function bookHtml(log){
 }
 
 /* GM履歴テーブルの1つの座席セルを、その回の pc_ho_disclosure に応じて描画する。
-   ・名前公開OK     : 座席＋プレイヤー名（例: "PC1　Bさん"）
+   座席（PC/HO）自体は列見出しで示されているため、セル内にはPL名のみ表示する。
+   ・名前公開OK     : プレイヤー名のみ（例: "Bさん"）
    ・順番のみ公開OK : 座席のみ（例: "PC1"）
    ・公開NG／その他 : 空欄 */
 function gmSeatCellHtml(match, seat){
@@ -1900,8 +1908,8 @@ function gmSeatCellHtml(match, seat){
   if(!p) return `<td class="gm-seat-empty">-</td>`;
   if(match.pc_ho_disclosure === '名前公開OK'){
     return p.player_name
-      ? `<td>${esc(seat)}　${esc(p.player_name)}</td>`
-      : `<td>${esc(seat)}</td>`;
+      ? `<td>${esc(p.player_name)}</td>`
+      : `<td class="gm-seat-empty">-</td>`;
   }
   if(match.pc_ho_disclosure === '順番のみ公開OK'){
     return `<td>${esc(seat)}</td>`;
@@ -1909,7 +1917,9 @@ function gmSeatCellHtml(match, seat){
   return `<td class="gm-seat-empty"></td>`;
 }
 
-/* GM履歴テーブル：日にち／座席（PC1・PC2…）／卓種類／配信 の一覧表 */
+/* GM履歴テーブル：配信／日にち／座席（PC1・PC2…）／卓種類 の一覧表
+   表が横に長くなり右側（日にちより後ろ）が隠れやすいため、
+   配信情報（サムネイル・URL）は先頭＝日にちより左に配置する。 */
 function gmHistoryTableHtml(record){
   const { matches, seatColumns } = record;
   if(!matches.length){
@@ -1931,11 +1941,11 @@ function gmHistoryTableHtml(record){
       }</a>`;
     }
     const streamCell = `<td class="gm-stream-cell">${streamCellInner}</td>`;
-    return `<tr><td>${dateLabel}</td>${seatCells}${tableTypeCell}${streamCell}</tr>`;
+    return `<tr>${streamCell}<td>${dateLabel}</td>${seatCells}${tableTypeCell}</tr>`;
   }).join('');
 
   return `<div class="gm-history-wrap"><table class="gm-history-table">
-    <thead><tr><th>日にち</th>${theadCols}<th>卓種類</th><th>配信</th></tr></thead>
+    <thead><tr><th>配信</th><th>日にち</th>${theadCols}<th>卓種類</th></tr></thead>
     <tbody>${rows}</tbody>
   </table></div>`;
 }
