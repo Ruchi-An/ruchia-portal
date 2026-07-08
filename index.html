@@ -548,26 +548,39 @@ a:hover .scenario-stream-thumb{ opacity:.85; border-color:var(--select-border); 
   font-size:.86rem; color:var(--pale-blue); line-height:1.9; white-space:pre-wrap; word-break:break-word;
   background:rgba(255,255,255,.02); border:1px solid var(--line-soft); border-radius:10px; padding:12px 14px;
 }
-.gm-history-wrap{
-  width:100%; max-width:100%; overflow-x:auto; border-radius:10px; border:1px solid var(--line-soft);
-  scrollbar-width:thin; scrollbar-color:var(--line-strong) transparent;
+/* GM履歴：横幅超過を避けるため、表ではなく日付+サムネイルのチップ/カード一覧にする。
+   クリックで gmMatchModal（別ページ相当のオーバーレイ）に詳細を表示する。 */
+.gm-history-cards{ display:flex; flex-wrap:wrap; gap:10px; padding:2px 0; }
+.gm-history-card{
+  display:flex; flex-direction:column; align-items:center; gap:6px;
+  width:96px; padding:8px; border:1px solid var(--line-strong); border-radius:var(--radius-sm);
+  background:rgba(255,255,255,.02); cursor:pointer;
+  transition:background .2s ease, border-color .2s ease;
 }
-.gm-history-wrap::-webkit-scrollbar{ height:8px; }
-.gm-history-wrap::-webkit-scrollbar-track{ background:rgba(255,255,255,.03); }
-.gm-history-wrap::-webkit-scrollbar-thumb{ background:var(--line-strong); border-radius:4px; }
-.gm-history-wrap::-webkit-scrollbar-thumb:hover{ background:var(--star-blue); }
-.gm-history-table{ width:max-content; min-width:100%; border-collapse:collapse; font-size:.8rem; white-space:nowrap; }
-.gm-history-table th, .gm-history-table td{
-  padding:8px 12px; text-align:left; border-bottom:1px solid var(--select-bg); vertical-align:middle;
+.gm-history-card:hover, .gm-history-card:focus-visible{
+  background:var(--select-bg); border-color:var(--select-border); outline:none;
 }
-.gm-history-table th{ color:var(--star-blue); font-weight:500; font-size:.74rem; background:rgba(255,255,255,.02); }
-.gm-history-table td{ color:var(--pale-blue); }
-.gm-history-table tr:last-child td{ border-bottom:none; }
-.gm-history-table td.gm-seat-empty{ opacity:.4; }
-.gm-stream-thumb-sm{
-  width:64px; height:64px; border-radius:8px; border:1px solid var(--line-strong); object-fit:cover; display:block;
+.gm-history-card-thumb-frame{ width:100%; max-width:none; }
+.gm-history-card-thumb{ width:100%; aspect-ratio:16/9; object-fit:cover; border-radius:6px; display:block; }
+.gm-history-card-thumb-empty{
+  width:100%; aspect-ratio:16/9; border-radius:6px; display:flex; align-items:center; justify-content:center;
+  background:rgba(255,255,255,.03); color:var(--star-blue); opacity:.55;
 }
-.gm-history-table .gm-stream-cell a{ display:inline-block; }
+.gm-history-card-date{
+  font-size:.66rem; color:var(--star-blue); font-family:var(--font-disp-en); letter-spacing:.02em; text-align:center;
+}
+.gm-match-modal .gm-match-modal-content{
+  position:relative; max-width:520px; width:calc(100% - 32px); max-height:86vh; overflow-y:auto;
+  background:linear-gradient(180deg, var(--night-mid), var(--night-deep));
+  border:1px solid var(--line-strong); border-radius:var(--radius-lg); box-shadow:var(--shadow-deep);
+  padding:28px 24px 24px;
+}
+.gm-match-modal-close{
+  position:absolute; top:12px; right:12px; width:28px; height:28px; border-radius:50%;
+  border:1px solid var(--line-strong); background:rgba(255,255,255,.04); color:var(--pale-blue);
+  cursor:pointer; font-size:.8rem; line-height:1; display:flex; align-items:center; justify-content:center;
+}
+.gm-match-modal-close:hover{ background:var(--select-bg); border-color:var(--select-border); }
 .lr-count{
   font-size:.64rem; letter-spacing:.04em; padding:2px 8px; border-radius:999px;
   border:1px solid var(--line-strong); color:var(--star-blue); margin-left:6px; white-space:nowrap;
@@ -902,6 +915,12 @@ a:hover .scenario-stream-thumb{ opacity:.85; border-color:var(--select-border); 
   <section class="page" id="page-image"></section>
     <div id="imageModal" class="image-modal" onclick="closeImage()">
       <span class="wm-frame" id="modalImageFrame"><img id="modalImage" src="" alt="" crossorigin="anonymous"></span>
+    </div>
+    <div id="gmMatchModal" class="image-modal gm-match-modal" onclick="closeGmMatchModal()">
+      <div class="gm-match-modal-content" onclick="event.stopPropagation()">
+        <button type="button" class="gm-match-modal-close" onclick="closeGmMatchModal()" aria-label="閉じる">✕</button>
+        <div id="gmMatchModalBody"></div>
+      </div>
     </div>
   </section>
 
@@ -1634,6 +1653,7 @@ function buildGmRecords(contentList, scheduleList){
         table_type: s.table_type || '',
         stream_url: s.stream_url || '',
         thumbnail_url: s.img_thumbnail || '',
+        endcard_url: s.img_endcard || '',
         participants: Array.isArray(s.participants) ? s.participants : [],
         pc_ho_disclosure: s.pc_ho_disclosure || ''
       }))
@@ -1898,56 +1918,115 @@ function bookHtml(log){
     </div>`;
 }
 
-/* GM履歴テーブルの1つの座席セルを、その回の pc_ho_disclosure に応じて描画する。
-   座席（PC/HO）自体は列見出しで示されているため、セル内にはPL名のみ表示する。
-   ・名前公開OK     : プレイヤー名のみ（例: "Bさん"）
-   ・順番のみ公開OK : 座席のみ（例: "PC1"）
-   ・公開NG／その他 : 空欄 */
-function gmSeatCellHtml(match, seat){
-  const p = match.participants.find(p=> p.seat === seat);
-  if(!p) return `<td class="gm-seat-empty">-</td>`;
-  if(match.pc_ho_disclosure === '名前公開OK'){
-    return p.player_name
-      ? `<td>${esc(p.player_name)}</td>`
-      : `<td class="gm-seat-empty">-</td>`;
-  }
-  if(match.pc_ho_disclosure === '順番のみ公開OK'){
-    return `<td>${esc(seat)}</td>`;
-  }
-  return `<td class="gm-seat-empty"></td>`;
-}
+/* GM履歴に現在表示中のレコードを保持し、カードクリック時に openGmMatchDetail から参照する。
+   （GM実績の詳細パネルは1件ずつしか表示されないため、単純なグローバル参照で十分） */
+let currentGmHistoryRecord = null;
 
-/* GM履歴テーブル：配信／日にち／座席（PC1・PC2…）／卓種類 の一覧表
-   表が横に長くなり右側（日にちより後ろ）が隠れやすいため、
-   配信情報（サムネイル・URL）は先頭＝日にちより左に配置する。 */
-function gmHistoryTableHtml(record){
-  const { matches, seatColumns } = record;
+/* GM履歴カード一覧：表にすると横幅超過で隠れてしまうため、
+   日付とサムネイルだけを並べたチップ/カードにする。
+   クリックすると gmMatchModal（別ページ相当のオーバーレイ）にその回の詳細を表示する。 */
+function gmHistoryCardsHtml(record){
+  const { matches } = record;
   if(!matches.length){
     return `<div class="empty-note" style="padding:16px 4px;">GM履歴はまだありません。</div>`;
   }
-  const theadCols = seatColumns.map(s=>`<th>${esc(s)}</th>`).join('');
-  const rows = matches.map(m=>{
+  currentGmHistoryRecord = record;
+  const cards = matches.map((m, i)=>{
     const dateLabel = m.date ? fmtDateYMDW(m.date) : '日程未定';
-    const seatCells = seatColumns.map(s=> gmSeatCellHtml(m, s)).join('');
-    const tableTypeCell = `<td>${m.table_type ? esc(m.table_type) : '-'}</td>`;
-    const streamUrlSafe = safeUrl(m.stream_url);
-    const streamThumb = safeUrl(m.thumbnail_url);
-    let streamCellInner = '-';
-    if(streamUrlSafe){
-      streamCellInner = `<a href="${esc(streamUrlSafe)}" target="_blank" rel="noopener" title="配信を開く" onclick="return confirm('配信を見ますか？');">${
-        streamThumb
-          ? `<span class="wm-frame"><img class="gm-stream-thumb-sm" src="${esc(streamThumb)}" alt="${esc(record.scenario_name)} 配信サムネイル" crossorigin="anonymous"></span>`
-          : `<span class="v scenario-stream-url">${esc(streamUrlSafe)}</span>`
-      }</a>`;
-    }
-    const streamCell = `<td class="gm-stream-cell">${streamCellInner}</td>`;
-    return `<tr>${streamCell}<td>${dateLabel}</td>${seatCells}${tableTypeCell}</tr>`;
+    const thumb = safeUrl(m.thumbnail_url);
+    const thumbHtml = thumb
+      ? `<span class="wm-frame gm-history-card-thumb-frame"><img class="gm-history-card-thumb" src="${esc(thumb)}" alt="" crossorigin="anonymous"></span>`
+      : `<div class="gm-history-card-thumb gm-history-card-thumb-empty"><svg width="18" height="18"><use href="#ico-star"/></svg></div>`;
+    return `<div class="gm-history-card" data-idx="${i}" role="button" tabindex="0" title="この回の詳細を見る">
+      ${thumbHtml}
+      <span class="gm-history-card-date">${esc(dateLabel)}</span>
+    </div>`;
   }).join('');
+  return `<div class="gm-history-cards">${cards}</div>`;
+}
 
-  return `<div class="gm-history-wrap"><table class="gm-history-table">
-    <thead><tr><th>配信</th><th>日にち</th>${theadCols}<th>卓種類</th></tr></thead>
-    <tbody>${rows}</tbody>
-  </table></div>`;
+/* GM履歴カードのクリック／キーボード操作を有効化する（innerHTML差し替え後に毎回呼ぶ） */
+function initGmHistoryCards(root){
+  (root || document).querySelectorAll('.gm-history-card').forEach(card=>{
+    const idx = +card.dataset.idx;
+    card.addEventListener('click', ()=> openGmMatchDetail(idx));
+    card.addEventListener('keydown', e=>{
+      if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); openGmMatchDetail(idx); }
+    });
+  });
+}
+
+/* GM履歴カードから開く、その回の通過予定の詳細画面相当のオーバーレイ */
+function openGmMatchDetail(idx){
+  const record = currentGmHistoryRecord;
+  if(!record) return;
+  const match = record.matches[idx];
+  if(!match) return;
+  const body = document.getElementById('gmMatchModalBody');
+  body.innerHTML = gmMatchDetailHtml(record, match);
+  document.getElementById('gmMatchModal').classList.add('show');
+  initWatermarks(body);
+}
+
+function closeGmMatchModal(){
+  document.getElementById('gmMatchModal').classList.remove('show');
+}
+
+/* GM履歴の1回分の詳細画面。bookHtml（通過予定の詳細画面）に準じたレイアウトで、
+   シナリオのマスター情報（record.content）とその回の記録（match）を組み合わせて表示する。 */
+function gmMatchDetailHtml(record, match){
+  const c = record.content || {};
+  const dateLabel = match.date ? fmtDateYMDW(match.date) : '日程未定';
+  const genreLabel = c.genre || record.genre || '-';
+  const endcard = safeUrl(match.endcard_url);
+  const officialLink = safeUrl(c.official_link);
+
+  const genreTag = `<span class="detail-tag">${esc(genreLabel)}</span>`;
+  const tableTypeTag = match.table_type ? `<span class="detail-tag detail-tag-tabletype">${esc(match.table_type)}</span>` : '';
+  const countTag = c.player_count ? `<span class="detail-tag detail-tag-count">${esc(c.player_count)}PL</span>` : '';
+  const tagsTag = tagChipsInline(c.tags);
+  const tagRow = `<div class="scenario-tag-row">${genreTag}${tableTypeTag}${countTag}${tagsTag}</div>`;
+
+  const hasParticipants = Array.isArray(match.participants) && match.participants.length > 0;
+  const participantsBlock = hasParticipants
+    ? participantsTableHtml(match.participants, match.pc_ho_disclosure)
+    : '';
+
+  const detailA = [
+    ['日にち', esc(dateLabel)],
+    ['卓種類', match.table_type ? esc(match.table_type) : '-']
+  ];
+  const detailAHtml = detailA.map(([k,v])=>`<span class="k">${k}</span><span class="v">${v}</span>`).join('');
+
+  const endcardBlock = endcard
+    ? `<span class="wm-frame" style="cursor:zoom-in;" onclick="openImage('${esc(endcard)}')"><img class="scenario-endcard" src="${esc(endcard)}" alt="endcard" crossorigin="anonymous"></span>`
+    : '';
+
+  /* 配信リンク：table_type="配信卓" のときのみ表示（詳細画面と同じ扱い） */
+  const canShowStream = match.table_type === '配信卓';
+  const streamUrlSafe = canShowStream ? safeUrl(match.stream_url) : '';
+  const streamThumb = safeUrl(match.thumbnail_url);
+  const streamBlock = streamUrlSafe
+    ? `<div class="scenario-stream-wrap"><a href="${esc(streamUrlSafe)}" target="_blank" rel="noopener" title="配信を開く" onclick="return confirm('配信を見ますか？');">${streamThumb ? `<span class="wm-frame"><img class="scenario-stream-thumb" src="${esc(streamThumb)}" alt="${esc(record.scenario_name)} 配信サムネイル" crossorigin="anonymous"></span>` : `<span class="v scenario-stream-url">${esc(streamUrlSafe)}</span>`}</a></div>`
+    : '';
+
+  const detailB = [
+    ['公式サイト', officialLink ? personLinkChip('公式サイト', officialLink, 'ico-link') : '-'],
+    ['制作', c.production ? personLinkChip(c.production, c.production_link, 'ico-building') : '-'],
+    ['作者', c.author ? personLinkChip(c.author, c.author_link, 'ico-pen') : '-']
+  ];
+  const detailBHtml = detailB.map(([k,v])=>`<span class="k">${k}</span><span class="v">${v}</span>`).join('');
+
+  return `
+    ${tagRow}
+    <h3>${esc(record.scenario_name)}</h3>
+    <div class="scenario-detail-stack">
+      <div class="scenario-detail-grid">${detailAHtml}</div>
+      ${participantsBlock}
+      ${endcardBlock}
+      ${streamBlock}
+      <div class="scenario-detail-grid">${detailBHtml}</div>
+    </div>`;
 }
 
 /* GM実績（GM LOG）タブの詳細表示。
@@ -1983,7 +2062,7 @@ function gmHtml(record){
 
   const synopsisBlock = `<div class="scenario-block"><div class="scenario-block-title">あらすじ</div><div class="scenario-block-body">${esc(c.synopsis || '-')}</div></div>`;
   const overviewBlock = `<div class="scenario-block"><div class="scenario-block-title">概要</div><div class="scenario-block-body">${esc(c.overview || '-')}</div></div>`;
-  const gmHistoryBlock = `<div class="scenario-block"><div class="scenario-block-title">GM履歴</div>${gmHistoryTableHtml(record)}</div>`;
+  const gmHistoryBlock = `<div class="scenario-block"><div class="scenario-block-title">GM履歴</div>${gmHistoryCardsHtml(record)}</div>`;
 
   return `
     ${tagRow}
@@ -2120,6 +2199,8 @@ function openDetailAt(idx){
   document.getElementById('bookPagePanel').innerHTML = html;
   initWatermarks(document.getElementById('bookPage'));
   initWatermarks(document.getElementById('bookPagePanel'));
+  initGmHistoryCards(document.getElementById('bookPage'));
+  initGmHistoryCards(document.getElementById('bookPagePanel'));
   updateDetailNavState();
   renderLogListPage();
 }
